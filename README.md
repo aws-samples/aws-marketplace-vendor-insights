@@ -42,24 +42,30 @@ There are 2 CFT files that you will be running as part of the Vendor Insights se
 
 To begin the setup, execute the instructions to [Create a stack](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-using-console-create-stack-template.html) by specifying the S3 location for *[VendorInsightsPrerequisiteCFT.yaml](https://aws-vendor-insights.s3.amazonaws.com/vendor-onboarding-templates/v0/VendorInsightsPrerequisiteCFT.yaml)*. You can provide a custom name for the Stack.
 
-[Image: Screen Shot 2022-01-21 at 9.20.44 AM.png][Image: Screen Shot 2022-01-21 at 9.22.24 AM.png]
+<img width="422" alt="image" src="https://user-images.githubusercontent.com/3976999/168182997-7ef27624-b6aa-4262-a8c7-32e214716029.png">
+
 You may specify any additional tags you like for the resources deployed by this Stack. You can leave the *Stack failure option* to the default *“Roll back all stack resources”*.
 
-[Image: Screen Shot 2022-01-21 at 9.24.54 AM.png]
+<img width="422" alt="image" src="https://user-images.githubusercontent.com/3976999/168183096-a1480f58-b772-48cb-b9b0-49341595a3fa.png">
+
 On the final step, you will need to acknowledge the IAM role creation checkbox since this CFT run will provision the 2 IAM roles in your AWS account on completion - an *AdministratorRole* and *ExecutionRole* that will facilitate running the *VendorInsightsOnboardingCFT.yaml* StackSet in Step 2.
 
-[Image: Screen Shot 2022-01-21 at 9.26.49 AM.png]
+<img width="422" alt="image" src="https://user-images.githubusercontent.com/3976999/168183109-bc99c4ed-b246-4258-b1f3-b2aab2941c2c.png">
+
 Once the stack is successfully executed, you may proceed to **Step 2** below.
 
-[Image: Screen Shot 2022-01-21 at 9.31.05 AM.png]
+<img width="422" alt="image" src="https://user-images.githubusercontent.com/3976999/168183119-2d3fc792-8c8c-420a-95da-44819396e65a.png">
 
 ### **Step 2: Execute *VendorInsightsOnboardingCFT.yaml* to setup AWS services for Vendor Insights:**
 
 Next, execute the instructions to [Create a stack set with self-managed permissions](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stacksets-getting-started-create.html#stacksets-getting-started-create-self-managed). Select the *Self-service permissions* option. For the admin and execution permissions, use *AWSVendorInsightsOnboardingStackSetsAdmin* and *AWSVendorInsightsOnboardingStackSetsExecution* respectively that were previously created in Step 1.
 
-[Image: Screen Shot 2022-01-21 at 9.35.02 AM.png]Specify the S3 location for *[VendorInsightsOnboardingCFT.yaml](https://aws-vendor-insights.s3.amazonaws.com/vendor-onboarding-templates/v0/VendorInsightsOnboardingCFT.yaml).*
+<img width="422" alt="image" src="https://user-images.githubusercontent.com/3976999/168183155-9fc54da7-352d-4139-b9d1-965ff734dbc6.png">
 
-[Image: Screen Shot 2022-01-21 at 9.37.10 AM.png]
+Specify the S3 location for *[VendorInsightsOnboardingCFT.yaml](https://aws-vendor-insights.s3.amazonaws.com/vendor-onboarding-templates/v0/VendorInsightsOnboardingCFT.yaml).*
+
+<img width="422" alt="image" src="https://user-images.githubusercontent.com/3976999/168183189-49745610-56e7-4447-84d1-0b41d0a4ba10.png">
+
 You can provide a name of your choice for the StackSet. For the StackSet parameters, enter the following values:
 
 * **CreateVendorInsightsSelfAssessment**: This parameter sets up the Audit Manager self assessment in your AWS account. Leave this to the default value of True.
@@ -68,20 +74,24 @@ You can provide a name of your choice for the StackSet. For the StackSet paramet
 * **CreateVendorInsightsIAMRoles**: This parameter provisions an IAM role that allows the Vendor Insights service to read the assessment and artifact data in your AWS account.
 * **PrimaryRegion**: Set this parameter to the primary region for your SaaS deployment. This is the region where the S3 bucket and Self Assessment will be created in your AWS account. In case your SaaS product is deployed to just 1 region, then that region will be the primary region.
 
+<img width="422" alt="image" src="https://user-images.githubusercontent.com/3976999/168183233-6cbdfc53-9bf0-4c5c-8005-41f5a15a9278.png">
 
-[Image: Screen Shot 2022-01-21 at 9.40.47 AM.png][Image: Screen Shot 2022-01-21 at 9.41.39 AM.png]
 In the **Accounts** step of the StackSet execution, deploy the stack to the account you’re running the StackSet in by specifying the AWS account ID for the current account. ***Note***: While [CFT StackSets](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/what-is-cfnstacksets.html) support cross-account deployments, we recommend running these StackSets individually on each AWS account in which your AWS Marketplace SaaS product is running.
 
 On the **Specify region** step of the StackSet execution, provide a list of regions to which your SaaS product has been deployed. Automated Assessments will be created in each specified region. In case your SaaS product is deployed to just 1 region, then select just that region here. ***Note***: The first region in this list must be the region you set as your *PrimaryRegion* above.
 
-[Image: Screen Shot 2022-01-21 at 9.43.06 AM.png][Image: Screen Shot 2022-01-21 at 9.44.51 AM.png][Image: Screen Shot 2022-01-21 at 9.46.57 AM.png]
+<img width="422" alt="image" src="https://user-images.githubusercontent.com/3976999/168183275-2a04d0cc-7722-493f-8ff5-ecbbdf6d7f37.png">
+
 You can leave the *Region Concurrency* option to the default *Sequential* run.
 
 On the final step, acknowledge both checkboxes before submission, since the additional IAM roles *AWSVendorInsightsRole* and *AWSVendorInsightsOnboardingDelegationRole* mentioned above will be created by this StackSet run.
 
-[Image: Screen Shot 2022-01-21 at 9.48.35 AM.png]
+<img width="422" alt="image" src="https://user-images.githubusercontent.com/3976999/168183293-2eedb36a-9fe7-435f-8b4f-ea76b400b1e4.png">
+
 Once the execution of the *VendorInsightsOnboardingCFT.yaml* StackSet is completed, you may begin uploading certification artifacts such as ISO-27001 and SOC2 reports to the *vendor-insights-audit-reports-bucket-{account number}* S3 bucket in your account.
-[Image: image.png]
+
+<img width="422" alt="image" src="https://user-images.githubusercontent.com/3976999/168183312-5bb7063e-e049-4c34-9498-93f24f485077.png">
+
 **Please contact AWS Marketplace** by replying to the welcome email invite you received, indicating that you’ve successfully run the StackSet in your account. The output files in *vendor-insights-stack-set-output-bucket-{account number}* will be used by the Vendor Insights support team to complete onboarding your product to Vendor Insights.
 
 ## **Contact us**
