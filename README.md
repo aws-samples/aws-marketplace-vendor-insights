@@ -1,11 +1,6 @@
-## My Project
+## AWS Marketplace Vendor Assessment
 
-TODO: Fill this README out!
-
-Be sure to:
-
-* Change the title in this README
-* Edit your repository description on GitHub
+* This repository contains all the assets needed to onboard ISVs to AWS Marketplace's vendor assessment feature
 
 ## Security
 
