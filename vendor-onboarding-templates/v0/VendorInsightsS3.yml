@@ -1,0 +1,161 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Parameters:
+  CreateAuditReportsBucket:
+    Type: String
+    Default: "Yes"
+    Description: Do you want to create the Vendor Insights Artifacts S3 Bucket(vendor-insights-artifacts-bucket-{YourAccountID}) and its related bucket policy? If it already exists, please Select 'No'
+    AllowedValues:
+      - "Yes"
+      - "No"
+  VendorInsightsBucketName:
+    Description: "S3 Bucket to share assets with AWS Marketplace Operations Team"
+    MinLength: 4
+    Type: String
+  AssessmentReportsBucketName:
+    Description: "S3 Bucket for AWS Audit Manager to store generated assessment reports"
+    MinLength: 4
+    Type: String
+  StackSetOutputsBucketName:
+    Description: "S3 Bucket for the Vendor Insights LaunchPad Stack Set deployment to store output"
+    MinLength: 4
+    Type: String
+
+Conditions:
+  CreateArtifactsBucket: !Equals
+    - !Ref CreateAuditReportsBucket
+    - "Yes"
+
+Resources:
+  VendorInsightsStackSetOutputsBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    DeletionPolicy: Retain
+    Properties:
+      Bucket: !Ref StackSetOutputsS3Bucket
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Action: "s3:*"
+            Effect: Allow
+            Resource:
+              - !Sub 
+                - "arn:aws:s3:::${StackSetOutputsBucketName}"
+                - StackSetOutputsBucketName: !Ref StackSetOutputsS3Bucket
+              - !Sub 
+                - "arn:aws:s3:::${StackSetOutputsBucketName}/*"
+                - StackSetOutputsBucketName: !Ref StackSetOutputsS3Bucket
+            Principal:
+              Service: "vendor-insights.amazonaws.com"
+            Condition:
+              StringEquals:
+                'aws:SourceAccount':
+                  - !Ref AWS::AccountId
+          - Action: "s3:*"
+            Effect: Deny
+            Principal: "*"
+            Resource:
+              - !Sub
+                - "arn:aws:s3:::${StackSetOutputsBucketName}"
+                - StackSetOutputsBucketName: !Ref StackSetOutputsS3Bucket
+              - !Sub
+                - "arn:aws:s3:::${StackSetOutputsBucketName}/*"
+                - StackSetOutputsBucketName: !Ref StackSetOutputsS3Bucket
+            Condition:
+              Bool:
+                "aws:SecureTransport": "false"
+  VendorInsightsBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Condition: CreateArtifactsBucket
+    DeletionPolicy: Retain
+    Properties:
+      Bucket: !Ref VendorInsightsS3Bucket
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Action: ["s3:GetObject", "s3:ListBucket", "s3:GetBucketLocation"]
+            Effect: Allow
+            Resource:
+              - !Sub 
+                - "arn:aws:s3:::${VendorInsightsBucketName}"
+                - VendorInsightsBucketName: !Ref VendorInsightsS3Bucket
+              - !Sub 
+                - "arn:aws:s3:::${VendorInsightsBucketName}/*"
+                - VendorInsightsBucketName: !Ref VendorInsightsS3Bucket
+            Principal:
+              Service: "vendor-insights.amazonaws.com"
+            Condition:
+              StringEquals:
+                'aws:SourceAccount':
+                  - !Ref AWS::AccountId
+          - Action: "s3:*"
+            Effect: Deny
+            Principal: "*"
+            Resource:
+              - !Sub
+                - "arn:aws:s3:::${VendorInsightsBucketName}"
+                - VendorInsightsBucketName: !Ref VendorInsightsS3Bucket
+              - !Sub
+                - "arn:aws:s3:::${VendorInsightsBucketName}/*"
+                - VendorInsightsBucketName: !Ref VendorInsightsS3Bucket
+            Condition:
+              Bool:
+                "aws:SecureTransport": "false"
+  VendorInsightsS3Bucket:
+    Type: AWS::S3::Bucket
+    Condition: CreateArtifactsBucket
+    DeletionPolicy: Retain
+    Properties:
+      BucketName: !Ref VendorInsightsBucketName
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: "AES256"
+      VersioningConfiguration:
+        Status: Enabled
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls : true
+        BlockPublicPolicy : true
+        IgnorePublicAcls : true
+        RestrictPublicBuckets : true
+
+  AssessmentReportsS3Bucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    Properties:
+      BucketName: !Ref AssessmentReportsBucketName
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: "AES256"
+      VersioningConfiguration:
+        Status: Enabled
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls : true
+        BlockPublicPolicy : true
+        IgnorePublicAcls : true
+        RestrictPublicBuckets : true
+
+  StackSetOutputsS3Bucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    Properties:
+      BucketName: !Ref StackSetOutputsBucketName
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: "AES256"
+      VersioningConfiguration:
+        Status: Enabled
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls : true
+        BlockPublicPolicy : true
+        IgnorePublicAcls : true
+        RestrictPublicBuckets : true
+
+Outputs:
+  AssessmentReportsBucket:
+    Description: "S3 Bucket for AWS Audit Manager to store generated assessment reports"
+    Value: !Ref AssessmentReportsS3Bucket
+  StackSetsOutputBucket:
+    Description: "S3 Bucket for the Vendor Insights LaunchPad Stack Set deployment to store output"
+    Value: !Ref StackSetOutputsS3Bucket

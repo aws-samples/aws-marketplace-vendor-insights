@@ -1,0 +1,61 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Configure the AWSVendorInsightsOnboardingStackSetsAdmin and the AWSVendorInsightsOnboardingStackSetsExecution to enable stack set deployment for multi region scenarios
+
+Resources:
+  AdministrationRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: AWSVendorInsightsOnboardingStackSetsAdmin
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: cloudformation.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: /
+      Policies:
+        - PolicyName: AssumeRole-AWSVendorInsightsOnboardingStackSetsExecution
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - sts:AssumeRole
+                Resource:
+                  - "arn:*:iam::*:role/AWSVendorInsightsOnboardingStackSetsExecution"
+  
+  ExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: AWSVendorInsightsOnboardingStackSetsExecution
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS:
+                - !GetAtt AdministrationRole.Arn
+            Action:
+              - sts:AssumeRole
+      Path: /
+      Policies:
+        - PolicyName: AWSVendorInsightsStackSetsExecutionPolicy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action: 'config:*'
+                Resource: 
+                  - '*'
+      ManagedPolicyArns:
+        - !Sub arn:${AWS::Partition}:iam::aws:policy/AWSCloudFormationFullAccess
+        - !Sub arn:${AWS::Partition}:iam::aws:policy/IAMFullAccess
+        - !Sub arn:${AWS::Partition}:iam::aws:policy/AmazonS3FullAccess
+        - !Sub arn:${AWS::Partition}:iam::aws:policy/CloudWatchFullAccess
+        - !Sub arn:${AWS::Partition}:iam::aws:policy/AWSLambda_FullAccess
+        - !Sub arn:${AWS::Partition}:iam::aws:policy/service-role/AWS_ConfigRole
+        - !Sub arn:${AWS::Partition}:iam::aws:policy/AWSAuditManagerAdministratorAccess
+
+
