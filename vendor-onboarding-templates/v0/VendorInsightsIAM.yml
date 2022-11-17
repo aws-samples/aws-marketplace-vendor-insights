@@ -1,0 +1,189 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Parameters:
+  MarketplaceManagementAccountId:
+    Type: String
+    AllowedPattern: "^(\\d{12})$"
+    ConstraintDescription: MarketplaceManagementAccountId must be 12-digit number and cannot be left empty.
+    Description: Provide AWS account ID for your AWS account that you use for managing Marketplace product listings.
+  CreateAuditReportsBucket:
+    Type: String
+    Default: "Yes"
+    Description: Do you want to create the Vendor Insights Artifacts S3 Bucket(vendor-insights-artifacts-bucket-{YourAccountID}) and its related bucket policy? If it already exists, please Select 'No'
+    AllowedValues:
+      - "Yes"
+      - "No"
+  StackSetOutputsBucketName:
+    Type: String
+    MinLength: 4
+    Description: Stack Sets output bucket name
+
+Conditions:
+  CreateArtifactsBucket: !Equals
+    - !Ref CreateAuditReportsBucket
+    - "Yes"
+  IsCurrentAccountMarketplaceManagementAccount: !Equals
+    - !Ref MarketplaceManagementAccountId
+    - !Ref AWS::AccountId
+
+Resources:
+  AWSAuditManagerAdminRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: AWSAuditManagerAdminRole
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS:
+                - !Ref AWS::AccountId
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AWSAuditManagerAdministratorAccess
+
+  AWSVendorInsightsCrossAccountAccessPassRole:
+    Type: AWS::IAM::Role
+    Condition: IsCurrentAccountMarketplaceManagementAccount
+    Properties:
+      RoleName: AWSVendorInsightsCrossAccountAccessPassRole
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: vendor-insights.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess
+      Policies:
+        - PolicyName: AWSVendorInsightsAuditManagerReadOnlyPolicy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - auditmanager:GetAssessment
+                  - auditmanager:GetEvidenceFoldersByAssessmentControl
+                  - auditmanager:GetEvidenceByEvidenceFolder
+                Resource:
+                  - !Sub arn:aws:auditmanager:*:${AWS::AccountId}:assessment/*
+              - Effect: Allow
+                Action: auditmanager:GetAccountStatus
+                Resource:
+                  - !Sub arn:aws:auditmanager:*:${AWS::AccountId}:*
+        - PolicyName: AWSVendorInsightsAccessRolesAssumePolicy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action: sts:AssumeRole
+                Resource: arn:*:iam::*:role/AWSVendorInsightsRole
+
+  AWSVendorInsightsOnboardingDelegationRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: AWSVendorInsightsOnboardingDelegationRole
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: vendor-insights.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - !If
+          - IsCurrentAccountMarketplaceManagementAccount
+          - arn:aws:iam::aws:policy/AWSVendorInsightsVendorFullAccess
+          - !Ref AWS::NoValue
+      Policies:
+        - !If
+          - IsCurrentAccountMarketplaceManagementAccount
+          - PolicyName: AWSVendorInsightsOnboardingPassRolePolicy
+            PolicyDocument:
+              Version: 2012-10-17
+              Statement:
+                - Effect: Allow
+                  Action: iam:PassRole
+                  Resource: !GetAtt [AWSVendorInsightsCrossAccountAccessPassRole, Arn]
+                  Condition:
+                    StringEquals:
+                      'iam:PassedToService':
+                        - vendor-insights.amazonaws.com
+          - !Ref AWS::NoValue
+        - PolicyName: AWSVendorInsightsOnboardingS3AccessPolicy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:Get*
+                  - s3:List*
+                Resource:
+                  - !Sub arn:aws:s3:::vendor-insights-audit-reports-bucket-${AWS::AccountId}/*
+                  - !Sub arn:aws:s3:::vendor-insights-audit-reports-bucket-${AWS::AccountId}
+                  - !Sub
+                    - "arn:aws:s3:::${StackSetOutputsBucketName}"
+                    - StackSetOutputsBucketName: !Ref StackSetOutputsBucketName
+                  - !Sub
+                    - "arn:aws:s3:::${StackSetOutputsBucketName}/*"
+                    - StackSetOutputsBucketName: !Ref StackSetOutputsBucketName
+
+  AWSVendorInsightsRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: AWSVendorInsightsRole
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS:
+                - !Ref MarketplaceManagementAccountId
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: AWSVendorInsightsAuditReportsBucketReadOnlyPolicy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:Get*
+                  - s3:List*
+                Resource:
+                  - !Sub arn:aws:s3:::vendor-insights-audit-reports-bucket-${AWS::AccountId}/*
+                  - !Sub arn:aws:s3:::vendor-insights-audit-reports-bucket-${AWS::AccountId}
+        - PolicyName: AWSVendorInsightsAuditManagerReadOnlyPolicy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - auditmanager:GetAssessment
+                  - auditmanager:GetEvidenceFoldersByAssessmentControl
+                  - auditmanager:GetEvidenceByEvidenceFolder
+                Resource:
+                  - !Sub arn:aws:auditmanager:*:${AWS::AccountId}:assessment/*
+              - Effect: Allow
+                Action: auditmanager:GetAccountStatus
+                Resource:
+                  - !Sub arn:aws:auditmanager:*:${AWS::AccountId}:*
+
+Outputs:
+  AWSMarkeptlaceVendorInsightsCrossAccountAccessPassRole:
+    Condition: IsCurrentAccountMarketplaceManagementAccount
+    Description: AWSMarkeptlaceVendorInsightsCrossAccountAccessPassRole ARN (To be provided to AWS Marketplace Operations Team)
+    Value: !GetAtt
+      - AWSVendorInsightsCrossAccountAccessPassRole
+      - Arn
+  AWSMarketplaceVendorInsightsRoleArn:
+    Description: AWSVendorInsightsRole ARN (To be provided to AWS Marketplace Operations Team)
+    Value: !GetAtt
+      - AWSVendorInsightsRole
+      - Arn
+  AWSMarketplaceVendorInsightsMCORoleArn:
+    Condition: IsCurrentAccountMarketplaceManagementAccount
+    Description: AWSVendorInsightsMCORole ARN (To be provided to AWS Marketplace Operations Team)
+    Value: !GetAtt
+      - AWSVendorInsightsOnboardingDelegationRole
+      - Arn
