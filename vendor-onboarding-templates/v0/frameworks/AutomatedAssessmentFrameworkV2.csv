@@ -1,0 +1,1578 @@
+ControlTitle,ControlName,ControlSet,ControlDomain,ControlSources,ControlDescription,TestingInformation,ControlStatus,ControlImportantText,EvidenceExtractionDetail,RemediationText,EvidenceCollectionType,Events,TemplateName,TemplateTitle,TemplateDescription,TemplateNecessity,TemplateOverview,TemplateStatus,TemplateLogo,ComplianceStandard,VendorName,VendorContactDetails
+Data Security 2.4.1 - Data Encryption - Data Encryption at Rest,Everest Automated - DS 2.4.1,Data Security,Data security and privacy,AWS Config,Is all data encrypted at rest?,,ACTIVE,,"Specify if all data is encrypted at rest.
+
+ AWS Config Rule(s):
+ 
+API_GW_CACHE_ENABLED_AND_ENCRYPTED
+CLOUD_TRAIL_ENCRYPTION_ENABLED
+CLOUDWATCH_LOG_GROUP_ENCRYPTED
+EFS_ENCRYPTED_CHECK
+ELASTICSEARCH_ENCRYPTED_AT_REST
+ENCRYPTED_VOLUMES
+RDS_STORAGE_ENCRYPTED
+REDSHIFT_CLUSTER_CONFIGURATION_CHECK
+S3_BUCKET_SERVER_SIDE_ENCRYPTION_ENABLED
+SAGEMAKER_ENDPOINT_CONFIGURATION_KMS_KEY_CONFIGURED
+SAGEMAKER_NOTEBOOK_INSTANCE_KMS_KEY_CONFIGURED
+SNS_ENCRYPTED_KMS
+EC2_EBS_ENCRYPTION_BY_DEFAULT
+DYNAMODB_TABLE_ENCRYPTED_KMS
+DYNAMODB_TABLE_ENCRYPTION_ENABLED
+RDS_SNAPSHOT_ENCRYPTED
+S3_DEFAULT_ENCRYPTION_KMS
+DAX_ENCRYPTION_ENABLED
+EKS_SECRETS_ENCRYPTED
+REDSHIFT_BACKUP_ENABLED
+RDS_IN_BACKUP_PLAN
+
+Learn more at: https://docs.aws.amazon.com/config/latest/developerguide/managed-rules-by-aws-config.html",,AUTOMATED,"{
+""events"": [{
+""eventSelector"": ""CLOUD_TRAIL_ENCRYPTION_ENABLED"",
+""eventSourceName"": ""CloudTrail-Config""
+}, {
+""eventSelector"": ""CLOUDWATCH_LOG_GROUP_ENCRYPTED"",
+""eventSourceName"": ""CloudTrail-Config""
+}, {
+""eventSelector"": ""EFS_ENCRYPTED_CHECK"",
+""eventSourceName"": ""CloudTrail-Config""
+}, {
+""eventSelector"": ""ELASTICSEARCH_ENCRYPTED_AT_REST"",
+""eventSourceName"": ""CloudTrail-Config""
+}, {
+""eventSelector"": ""ENCRYPTED_VOLUMES"",
+""eventSourceName"": ""CloudTrail-Config""
+}, {
+""eventSelector"": ""RDS_STORAGE_ENCRYPTED"",
+""eventSourceName"": ""CloudTrail-Config""
+}, {
+""eventSelector"": ""REDSHIFT_CLUSTER_CONFIGURATION_CHECK"",
+""eventSourceName"": ""CloudTrail-Config""
+}, {
+""eventSelector"": ""S3_BUCKET_SERVER_SIDE_ENCRYPTION_ENABLED"",
+""eventSourceName"": ""CloudTrail-Config""
+}, {
+""eventSelector"": ""SAGEMAKER_ENDPOINT_CONFIGURATION_KMS_KEY_CONFIGURED"",
+""eventSourceName"": ""CloudTrail-Config""
+}, {
+""eventSelector"": ""SAGEMAKER_NOTEBOOK_INSTANCE_KMS_KEY_CONFIGURED"",
+""eventSourceName"": ""CloudTrail-Config""
+}, {
+""eventSelector"": ""SNS_ENCRYPTED_KMS"",
+""eventSourceName"": ""CloudTrail-Config""
+}, {
+""eventSelector"": ""EC2_EBS_ENCRYPTION_BY_DEFAULT"",
+""eventSourceName"": ""CloudTrail-Config""
+}, {
+""eventSelector"": ""DYNAMODB_TABLE_ENCRYPTED_KMS"",
+""eventSourceName"": ""CloudTrail-Config""
+}, {
+""eventSelector"": ""DYNAMODB_TABLE_ENCRYPTION_ENABLED"",
+""eventSourceName"": ""CloudTrail-Config""
+}, {
+""eventSelector"": ""RDS_SNAPSHOT_ENCRYPTED"",
+""eventSourceName"": ""CloudTrail-Config""
+}, {
+""eventSelector"": ""S3_DEFAULT_ENCRYPTION_KMS"",
+""eventSourceName"": ""CloudTrail-Config""
+}, {
+""eventSelector"": ""DAX_ENCRYPTION_ENABLED"",
+""eventSourceName"": ""CloudTrail-Config""
+}, {
+""eventSelector"": ""EKS_SECRETS_ENCRYPTED"",
+""eventSourceName"": ""CloudTrail-Config""
+}, {
+""eventSelector"": ""REDSHIFT_BACKUP_ENABLED"",
+""eventSourceName"": ""CloudTrail-Config""
+}, {
+""eventSelector"": ""RDS_IN_BACKUP_PLAN"",
+""eventSourceName"": ""CloudTrail-Config""
+}, {
+""eventSelector"": ""API_GW_CACHE_ENABLED_AND_ENCRYPTED"",
+""eventSourceName"": ""CloudTrail-Config""
+}]
+}",Third Party Software Risk  Automated Assessment  Template,Third Party Software Risk Automated Assessment,Third Party Software Risk Assessment is used for gathering information required to assess risks and threats in a third party softwares. This template is a subset of the Third Party Software Risk Assessment Template. This is used to gather evidence automatically from your AWS accounts that are used for hosting your SaaS solutions.,,,ACTIVE,buyer.svg,AWS Custom Risk Asssessment,AWS,https://aws.amazon.com/marketplace/
+Data Security 2.4.2 - Data Encryption - Data Encryption in Transit,Everest Automated - DS 2.4.2,Data Security,Data security and privacy,AWS Config,Is all data encrypted in-transit?,,ACTIVE,,"Specify if all data is encrypted in-transit.
+
+ AWS Config Rule(s):
+
+ Show all services are encrypted in transit. 
+
+ ALB_HTTP_TO_HTTPS_REDIRECTION_CHECK 
+ELB_ACM_CERTIFICATE_REQUIRED 
+ELB_CUSTOM_SECURITY_POLICY_SSL_CHECK 
+REDSHIFT_REQUIRE_TLS_SSL 
+CLOUDFRONT_VIEWER_POLICY_HTTPS 
+ALB_HTTP_DROP_INVALID_HEADER_ENABLED 
+ELASTICSEARCH_NODE_TO_NODE_ENCRYPTION_CHECK 
+ELB_TLS_HTTPS_LISTENERS_ONLY 
+ACM_CERTIFICATE_EXPIRATION_CHECK 
+API_GW_CACHE_ENABLED_AND_ENCRYPTED  
+
+Learn more at: https://docs.aws.amazon.com/config/latest/developerguide/managed-rules-by-aws-config.html",,AUTOMATED,"{
+""events"": [{
+""eventSelector"": ""ALB_HTTP_TO_HTTPS_REDIRECTION_CHECK"",
+""eventSourceName"": ""CloudTrail-Config""
+}, {
+""eventSelector"": ""ELB_ACM_CERTIFICATE_REQUIRED"",
+""eventSourceName"": ""CloudTrail-Config""
+}, {
+""eventSelector"": ""ELB_CUSTOM_SECURITY_POLICY_SSL_CHECK"",
+""eventSourceName"": ""CloudTrail-Config""
+}, {
+""eventSelector"": ""REDSHIFT_REQUIRE_TLS_SSL"",
+""eventSourceName"": ""CloudTrail-Config""
+}, {
+""eventSelector"": ""CLOUDFRONT_VIEWER_POLICY_HTTPS"",
+""eventSourceName"": ""CloudTrail-Config""
+}, {
+""eventSelector"": ""ALB_HTTP_DROP_INVALID_HEADER_ENABLED"",
+""eventSourceName"": ""CloudTrail-Config""
+}, {
+""eventSelector"": ""ELASTICSEARCH_NODE_TO_NODE_ENCRYPTION_CHECK"",
+""eventSourceName"": ""CloudTrail-Config""
+}, {
+""eventSelector"": ""ELB_TLS_HTTPS_LISTENERS_ONLY"",
+""eventSourceName"": ""CloudTrail-Config""
+}, {
+""eventSelector"": ""ACM_CERTIFICATE_EXPIRATION_CHECK"",
+""eventSourceName"": ""CloudTrail-Config""
+}, {
+""eventSelector"": ""API_GW_CACHE_ENABLED_AND_ENCRYPTED"",
+""eventSourceName"": ""CloudTrail-Config""
+}]
+}",Third Party Software Risk  Automated Assessment  Template,Third Party Software Risk Automated Assessment,Third Party Software Risk Assessment is used for gathering information required to assess risks and threats in a third party softwares. This template is a subset of the Third Party Software Risk Assessment Template. This is used to gather evidence automatically from your AWS accounts that are used for hosting your SaaS solutions.,,,ACTIVE,buyer.svg,AWS Custom Risk Asssessment,AWS,https://aws.amazon.com/marketplace/
+Data Security 2.5.1 - Data Storage and Classification - Data Backup,Everest Automated - DS 2.5.1,Data Security,Data security and privacy,AWS Config,Do you back up customer data?,,ACTIVE,,"Specify if you back up customer data. If yes, describe your back up policy (including details about how often backup occurs, where the backup is stored, backup encryption and redundancy.)
+
+ AWS Config Rule(s): 
+DB_INSTANCE_BACKUP_ENABLED 
+DYNAMODB_PITR_ENABLED 
+ELASTICACHE_REDIS_CLUSTER_AUTOMATIC_BACKUP_CHECK 
+S3_BUCKET_REPLICATION_ENABLED 
+S3_BUCKET_VERSIONING_ENABLED 
+DYNAMODB_IN_BACKUP_PLAN EBS_IN_BACKUP_PLAN 
+EFS_IN_BACKUP_PLAN REDSHIFT_BACKUP_ENABLED 
+RDS_IN_BACKUP_PLAN S3_BUCKET_REPLICATION_ENABLED 
+
+ Learn more at: https://docs.aws.amazon.com/config/latest/developerguide/managed-rules-by-aws-config.html",,AUTOMATED,"{
+""events"": [{
+""eventSelector"": ""DB_INSTANCE_BACKUP_ENABLED"",
+""eventSourceName"": ""CloudTrail-Config""
+}, {
+""eventSelector"": ""DYNAMODB_PITR_ENABLED"",
+""eventSourceName"": ""CloudTrail-Config""
+}, {
+""eventSelector"": ""ELASTICACHE_REDIS_CLUSTER_AUTOMATIC_BACKUP_CHECK"",
+""eventSourceName"": ""CloudTrail-Config""
+}, {
+""eventSelector"": ""S3_BUCKET_REPLICATION_ENABLED"",
+""eventSourceName"": ""CloudTrail-Config""
+}, {
+""eventSelector"": ""S3_BUCKET_VERSIONING_ENABLED"",
+""eventSourceName"": ""CloudTrail-Config""
+}, {
+""eventSelector"": ""DYNAMODB_IN_BACKUP_PLAN"",
+""eventSourceName"": ""CloudTrail-Config""
+}, {
+""eventSelector"": ""EBS_IN_BACKUP_PLAN"",
+""eventSourceName"": ""CloudTrail-Config""
+}, {
+""eventSelector"": ""EFS_IN_BACKUP_PLAN"",
+""eventSourceName"": ""CloudTrail-Config""
+}, {
+""eventSelector"": ""REDSHIFT_BACKUP_ENABLED"",
+""eventSourceName"": ""CloudTrail-Config""
+}, {
+""eventSelector"": ""RDS_IN_BACKUP_PLAN"",
+""eventSourceName"": ""CloudTrail-Config""
+}, {
+""eventSelector"": ""AUTOSCALING_GROUP_ELB_HEALTHCHECK_REQUIRED"",
+""eventSourceName"": ""CloudTrail-Config""
+}, {
+""eventSelector"": ""DYNAMODB_AUTOSCALING_ENABLED"",
+""eventSourceName"": ""CloudTrail-Config""
+}, {
+""eventSelector"": ""RDS_MULTI_AZ_SUPPORT"",
+""eventSourceName"": ""CloudTrail-Config""
+}]
+}",Third Party Software Risk Automated Assessment Template,Third Party Software Risk Automated Assessment,Third Party Software Risk Assessment is used for gathering information required to assess risks and threats in a third party softwares. This template is a subset of the Third Party Software Risk Assessment Template. This is used to gather evidence automatically from your AWS accounts that are used for hosting your SaaS solutions.,,,ACTIVE,buyer.svg,AWS Custom Risk Asssessment,AWS,https://aws.amazon.com/marketplace/
+Data Security 2.5.2 - Data Storage and Classification - Data Access Control Policy,Everest Automated - DS 2.5.2,Data Security,Data security and privacy,"API Calls, AWS Config",Do you implement appropriate access controls for stored customer data? Provide your access control policies.,,ACTIVE,,"Specify if appropriate access controls (such as RBAC) is implemented for stored customer data.
+
+  IAM:
+1: ListRoles, ListRolePolicies, GetRolePolicy
+2: ListUsers, ListUserPolicies, GetUserPolicy
+3: ListGroups, ListGroupPolicies, GetGroupPolicy
+
+CognitoListUser* and ListGroups from https://docs.aws.amazon.com/cognito-user-identity-pools/latest/APIReference/API_AdminListUserAuthEvents.html
+List all bucket policies
+RDS not public
+List all Principals and their associated policies
+
+AWS Config Rule(s): 
+DMS_REPLICATION_NOT_PUBLIC
+EBS_SNAPSHOT_PUBLIC_RESTORABLE_CHECK
+ELASTICSEARCH_IN_VPC_ONLY
+EMR_KERBEROS_ENABLED
+EMR_MASTER_NO_PUBLIC_IP
+IAM_GROUP_HAS_USERS_CHECK
+IAM_POLICY_NO_STATEMENTS_WITH_ADMIN_ACCESS
+IAM_USER_GROUP_MEMBERSHIP_CHECK
+IAM_USER_NO_POLICIES_CHECK
+RDS_INSTANCE_PUBLIC_ACCESS_CHECK
+RDS_SNAPSHOTS_PUBLIC_PROHIBITED
+REDSHIFT_CLUSTER_PUBLIC_ACCESS_CHECK
+S3_ACCOUNT_LEVEL_PUBLIC_ACCESS_BLOCKS
+S3_BUCKET_POLICY_GRANTEE_CHECK
+S3_BUCKET_PUBLIC_READ_PROHIBITED
+S3_BUCKET_PUBLIC_WRITE_PROHIBITED
+SAGEMAKER_NOTEBOOK_NO_DIRECT_INTERNET_ACCESS
+
+Learn more at: https://docs.aws.amazon.com/config/latest/developerguide/managed-rules-by-aws-config.html",,AUTOMATED,"{
+""events"": [{
+""eventSelector"": ""DMS_REPLICATION_NOT_PUBLIC"",
+""eventSourceName"": ""CloudTrail-Config""
+}, {
+""eventSelector"": ""EBS_SNAPSHOT_PUBLIC_RESTORABLE_CHECK"",
+""eventSourceName"": ""CloudTrail-Config""
+}, {
+""eventSelector"": ""ELASTICSEARCH_IN_VPC_ONLY"",
+""eventSourceName"": ""CloudTrail-Config""
+}, {
+""eventSelector"": ""EMR_KERBEROS_ENABLED"",
+""eventSourceName"": ""CloudTrail-Config""
+}, {
+""eventSelector"": ""EMR_MASTER_NO_PUBLIC_IP"",
+""eventSourceName"": ""CloudTrail-Config""
+}, {
+""eventSelector"": ""IAM_GROUP_HAS_USERS_CHECK"",
+""eventSourceName"": ""CloudTrail-Config""
+}, {
+""eventSelector"": ""IAM_POLICY_NO_STATEMENTS_WITH_ADMIN_ACCESS"",
+""eventSourceName"": ""CloudTrail-Config""
+}, {
+""eventSelector"": ""IAM_USER_GROUP_MEMBERSHIP_CHECK"",
+""eventSourceName"": ""CloudTrail-Config""
+}, {
+""eventSelector"": ""IAM_USER_NO_POLICIES_CHECK"",
+""eventSourceName"": ""CloudTrail-Config""
+}, {
+""eventSelector"": ""RDS_INSTANCE_PUBLIC_ACCESS_CHECK"",
+""eventSourceName"": ""CloudTrail-Config""
+}, {
+""eventSelector"": ""RDS_SNAPSHOTS_PUBLIC_PROHIBITED"",
+""eventSourceName"": ""CloudTrail-Config""
+}, {
+""eventSelector"": ""REDSHIFT_CLUSTER_PUBLIC_ACCESS_CHECK"",
+""eventSourceName"": ""CloudTrail-Config""
+}, {
+""eventSelector"": ""S3_ACCOUNT_LEVEL_PUBLIC_ACCESS_BLOCKS"",
+""eventSourceName"": ""CloudTrail-Config""
+}, {
+""eventSelector"": ""S3_BUCKET_POLICY_GRANTEE_CHECK"",
+""eventSourceName"": ""CloudTrail-Config""
+}, {
+""eventSelector"": ""S3_BUCKET_PUBLIC_READ_PROHIBITED"",
+""eventSourceName"": ""CloudTrail-Config""
+}, {
+""eventSelector"": ""S3_BUCKET_PUBLIC_WRITE_PROHIBITED"",
+""eventSourceName"": ""CloudTrail-Config""
+}, {
+""eventSelector"": ""SAGEMAKER_NOTEBOOK_NO_DIRECT_INTERNET_ACCESS"",
+""eventSourceName"": ""CloudTrail-Config""
+}, {
+""eventSelector"": ""iam_ListRoles"",
+""eventSourceName"": ""S2S"",
+""eventInputConfig"": {
+""Action"": ""listRoles"",
+""Service"": ""iam""
+}
+}, {
+""eventSelector"": ""iam_ListUsers"",
+""eventSourceName"": ""S2S"",
+""eventInputConfig"": {
+""Action"": ""listUsers"",
+""Service"": ""iam""
+}
+}, {
+""eventSelector"": ""iam_ListGroups"",
+""eventSourceName"": ""S2S"",
+""eventInputConfig"": {
+""Action"": ""listGroups"",
+""Service"": ""iam""
+}
+}, {
+""eventSelector"": ""iam_ListPolicies"",
+""eventSourceName"": ""S2S"",
+""eventInputConfig"": {
+""Action"": ""listPolicies"",
+""Service"": ""iam""
+}
+}]
+}",Third Party Software Risk Automated Assessment Template,Third Party Software Risk Automated Assessment,Third Party Software Risk Assessment is used for gathering information required to assess risks and threats in a third party softwares. This template is a subset of the Third Party Software Risk Assessment Template. This is used to gather evidence automatically from your AWS accounts that are used for hosting your SaaS solutions.,,,ACTIVE,buyer.svg,AWS Custom Risk Asssessment,AWS,https://aws.amazon.com/marketplace/
+Security and Configuration Policy 10.2.3 - Policies for Security Configurations - Changes to Configurations,Everest Automated - SP 10.2.3,Security & Configuration Policy,Development and configuration management,"Security Hub, API Calls",Are changes to configurations logged?,,ACTIVE,,"Specify if configuration changes are logged.   
+
+Learn more at:
+https://docs.aws.amazon.com/securityhub/latest/userguide/securityhub-standards-fsbp-controls.html#fsbp-config-1",,AUTOMATED,"{
+    ""events"": [
+        {
+            ""eventSelector"": ""Config.1"",
+            ""eventSourceName"": ""SecurityHub""
+        }
+    ]
+}",Third Party Software Risk Automated Assessment Template,Third Party Software Risk Automated Assessment,Third Party Software Risk Assessment is used for gathering information required to assess risks and threats in a third party softwares. This template is a subset of the Third Party Software Risk Assessment Template. This is used to gather evidence automatically from your AWS accounts that are used for hosting your SaaS solutions.,,,ACTIVE,buyer.svg,AWS Custom Risk Asssessment,AWS,https://aws.amazon.com/marketplace/
+Access Management 3.2.1 - Credential Management - Password Policy,Everest Automated - AC 3.2.1,Access Management,Identity and access management,AWS Config,Does the application have a strong password policy?,,ACTIVE,,"Specify if a strong password policy (such as RequireUppercaseCharacters, RequireSymbols, PasswordReusePrevention, etc) is present.
+
+AWS Config Rules : 
+
+IAM_PASSWORD_POLICY
+
+
+Learn more at: https://docs.aws.amazon.com/config/latest/developerguide/iam-password-policy.html",,AUTOMATED,"{
+""events"": [
+{""eventSelector"": ""IAM_PASSWORD_POLICY"", 
+ ""eventSourceName"": ""CloudTrail-Config"" 
+ }
+]
+}",Third Party Software Risk Automated Assessment Template,Third Party Software Risk Automated Assessment,Third Party Software Risk Assessment is used for gathering information required to assess risks and threats in a third party softwares. This template is a subset of the Third Party Software Risk Assessment Template. This is used to gather evidence automatically from your AWS accounts that are used for hosting your SaaS solutions.,,,ACTIVE,buyer.svg,AWS Custom Risk Asssessment,AWS,https://aws.amazon.com/marketplace/
+Access Management 3.2.3 - Credential Management - Secret Management,Everest Automated - AC 3.2.3,Access Management,Identity and access management,AWS Config,Do you use a secret management service?,,ACTIVE,,"Specify if there is a secret management in place. If yes, can you provide more details?
+
+AWS Config Rules : 
+SECRETSMANAGER_ROTATION_ENABLED_CHECK 
+SECRETSMANAGER_SCHEDULED_ROTATION_SUCCESS_CHECK",,AUTOMATED,"{
+    ""events"": [
+        {""eventSelector"": ""SECRETSMANAGER_ROTATION_ENABLED_CHECK"",
+""eventSourceName"": ""CloudTrail-Config""},
+        {""eventSelector"": ""SECRETSMANAGER_SCHEDULED_ROTATION_SUCCESS_CHECK"",
+""eventSourceName"": ""CloudTrail-Config""}
+    ]
+}",Third Party Software Risk Automated Assessment Template,Third Party Software Risk Automated Assessment,Third Party Software Risk Assessment is used for gathering information required to assess risks and threats in a third party softwares. This template is a subset of the Third Party Software Risk Assessment Template. This is used to gather evidence automatically from your AWS accounts that are used for hosting your SaaS solutions.,,,ACTIVE,buyer.svg,AWS Custom Risk Asssessment,AWS,https://aws.amazon.com/marketplace/
+Access Management 3.3.2 - Access to Production Environment - Two Factor Authentication,Everest Automated - AC 3.3.2,Access Management,Identity and access management,AWS Config,Is two-factor authentication required to access the production or hosted environment?,,ACTIVE,,"Specify if two-factor authentication (2FA) is required for access to production environment. If yes, what tool is used for 2FA?
+
+AWS Config Rules : 
+MFA_ENABLED_FOR_IAM_CONSOLE_ACCESS",,AUTOMATED,"{
+    ""events"": [
+{ ""eventSelector"": ""MFA_ENABLED_FOR_IAM_CONSOLE_ACCESS"", ""eventSourceName"": ""CloudTrail-Config"" }
+    ]
+}",Third Party Software Risk Automated Assessment Template,Third Party Software Risk Automated Assessment,Third Party Software Risk Assessment is used for gathering information required to assess risks and threats in a third party softwares. This template is a subset of the Third Party Software Risk Assessment Template. This is used to gather evidence automatically from your AWS accounts that are used for hosting your SaaS solutions.,,,ACTIVE,buyer.svg,AWS Custom Risk Asssessment,AWS,https://aws.amazon.com/marketplace/
+Access Management 3.3.4 - Access to Production Environment - Root User MFA,Everest Automated - AC 3.3.4,Access Management,Identity and access management,AWS Config,Does root user require multi-factor authentication (MFA)?,,ACTIVE,,"Specify if logging in as root user requires multi-factor authentication. If yes, what tool is used for MFA?
+
+Perform the following to determine if the root user account has MFA setup: From Command Line:
+
+1. Run the following command: aws iam get-account-summary | grep ""AccountMFAEnabled""
+2. Ensure the AccountMFAEnabled property is set to 1
+
+",,AUTOMATED,"{
+    ""events"": [
+        {
+            ""eventSelector"": ""ROOT_ACCOUNT_MFA_ENABLED"",
+            ""eventSourceName"": ""CloudTrail-Config""
+        },
+ {
+            ""eventSelector"": ""ROOT_ACCOUNT_HARDWARE_MFA_ENABLED"",
+            ""eventSourceName"": ""CloudTrail-Config""
+        }
+    ]
+}",Third Party Software Risk Automated Assessment Template,Third Party Software Risk Automated Assessment,Third Party Software Risk Assessment is used for gathering information required to assess risks and threats in a third party softwares. This template is a subset of the Third Party Software Risk Assessment Template. This is used to gather evidence automatically from your AWS accounts that are used for hosting your SaaS solutions.,,,ACTIVE,buyer.svg,AWS Custom Risk Asssessment,AWS,https://aws.amazon.com/marketplace/
+Access Management 3.3.5 - Access to Production Environment - Remote Access,Everest Automated - AC 3.3.5,Access Management,Identity and access management,AWS Config,"Is remote access to the production environment secured using mechanisms such as encrypted channels, key based authentication?",,ACTIVE,,"If the application permits remote access, specify if the access is secure (for example, will key-based authentication be used and will communication be done over encrypted channels?)
+
+AWS Config Rule(s): 
+
+ALB_HTTP_TO_HTTPS_REDIRECTION_CHECK
+REDSHIFT_REQUIRE_TLS_SSL
+ACM_CERTIFICATE_EXPIRATION_CHECK
+S3_BUCKET_SSL_REQUESTS_ONLY
+ELB_ACM_CERTIFICATE_REQUIRED
+ALB_HTTP_DROP_INVALID_HEADER_ENABLED
+ELB_TLS_HTTPS_LISTENERS_ONLY
+API_GW_SSL_ENABLED
+CLOUDFRONT_CUSTOM_SSL_CERTIFICATE
+CLOUDFRONT_VIEWER_POLICY_HTTPS
+ELB_CUSTOM_SECURITY_POLICY_SSL_CHECK
+ELB_PREDEFINED_SECURITY_POLICY_SSL_CHECK
+
+Learn more at: https://docs.aws.amazon.com/config/latest/developerguide/managed-rules-by-aws-config.html
+
+",,AUTOMATED,"{
+    ""events"": [
+{ ""eventSelector"": ""API_GW_SSL_ENABLED"", ""eventSourceName"": ""CloudTrail-Config"" },
+
+
+{ ""eventSelector"": ""CLOUDFRONT_CUSTOM_SSL_CERTIFICATE"", ""eventSourceName"": ""CloudTrail-Config"" },
+
+
+{ ""eventSelector"": ""CLOUDFRONT_VIEWER_POLICY_HTTPS"", ""eventSourceName"": ""CloudTrail-Config"" },
+
+
+{ ""eventSelector"": ""ELB_CUSTOM_SECURITY_POLICY_SSL_CHECK"", ""eventSourceName"": ""CloudTrail-Config"" },
+
+
+{ ""eventSelector"": ""ELB_PREDEFINED_SECURITY_POLICY_SSL_CHECK"", ""eventSourceName"": ""CloudTrail-Config"" },
+
+{ ""eventSelector"": ""ALB_HTTP_TO_HTTPS_REDIRECTION_CHECK"", ""eventSourceName"": ""CloudTrail-Config"" },
+
+
+{ ""eventSelector"": ""REDSHIFT_REQUIRE_TLS_SSL"", ""eventSourceName"": ""CloudTrail-Config"" },
+
+
+{ ""eventSelector"": ""ACM_CERTIFICATE_EXPIRATION_CHECK"", ""eventSourceName"": ""CloudTrail-Config"" },
+
+
+{ ""eventSelector"": ""S3_BUCKET_SSL_REQUESTS_ONLY"", ""eventSourceName"": ""CloudTrail-Config"" },
+
+
+{ ""eventSelector"": ""ELB_ACM_CERTIFICATE_REQUIRED"", ""eventSourceName"": ""CloudTrail-Config"" },
+
+
+{ ""eventSelector"": ""ALB_HTTP_DROP_INVALID_HEADER_ENABLED"", ""eventSourceName"": ""CloudTrail-Config"" },
+
+
+{ ""eventSelector"": ""ELB_TLS_HTTPS_LISTENERS_ONLY"", ""eventSourceName"": ""CloudTrail-Config"" }
+
+    ]
+}",Third Party Software Risk Automated Assessment Template,Third Party Software Risk Automated Assessment,Third Party Software Risk Assessment is used for gathering information required to assess risks and threats in a third party softwares. This template is a subset of the Third Party Software Risk Assessment Template. This is used to gather evidence automatically from your AWS accounts that are used for hosting your SaaS solutions.,,,ACTIVE,buyer.svg,AWS Custom Risk Asssessment,AWS,https://aws.amazon.com/marketplace/
+Application Security 4.1.4 - Secure Software Development Lifecycle - Secure Connection,Everest Automated - Appsec 4.1.4,Application Security,Development and configuration management,AWS Config,Is SSL/TLS enabled for all web pages/communications that uses customer data?,,ACTIVE,,"Specify if a secure connection (such as SSL/TLS) is used for all communication with customer data.
+
+AWS Config Rules : 
+ALB_HTTP_TO_HTTPS_REDIRECTION_CHECK
+ELB_TLS_HTTPS_LISTENERS_ONLY
+
+Learn more at 
+https://docs.aws.amazon.com/config/latest/developerguide/alb-http-to-https-redirection-check.html
+https://docs.aws.amazon.com/config/latest/developerguide/elb-tls-https-listeners-only.html",,AUTOMATED,"{
+    ""events"": [
+       {""eventSelector"": ""ALB_HTTP_TO_HTTPS_REDIRECTION_CHECK"",
+""eventSourceName"": ""CloudTrail-Config""},
+       {""eventSelector"": ""ELB_TLS_HTTPS_LISTENERS_ONLY"",
+""eventSourceName"": ""CloudTrail-Config""}
+    ]
+}",Third Party Software Risk Automated Assessment Template,Third Party Software Risk Automated Assessment,Third Party Software Risk Assessment is used for gathering information required to assess risks and threats in a third party softwares. This template is a subset of the Third Party Software Risk Assessment Template. This is used to gather evidence automatically from your AWS accounts that are used for hosting your SaaS solutions.,,,ACTIVE,buyer.svg,AWS Custom Risk Asssessment,AWS,https://aws.amazon.com/marketplace/
+Application Security 4.1.5 - Secure Software Development Lifecycle - Image Backup,Everest Automated - Appsec 4.1.5,Application Security,Development and configuration management,AWS Config,Are application image snapshots backed up?,,ACTIVE,,"Specify if image snapshots (such as systems supporting the application, systems hosting customer data) are backed up. If yes, is there a process to ensure that image snapshots containing scoped data are authorized prior to being snapped? Is access control implemented for the image snapshots?
+
+AWS Config Rule(s):
+
+DB_INSTANCE_BACKUP_ENABLED
+DYNAMODB_PITR_ENABLED
+ELASTICACHE_REDIS_CLUSTER_AUTOMATIC_BACKUP_CHECK
+S3_BUCKET_REPLICATION_ENABLED
+DYNAMODB_IN_BACKUP_PLAN
+EBS_IN_BACKUP_PLAN
+EFS_IN_BACKUP_PLAN
+RDS_IN_BACKUP_PLAN
+REDSHIFT_BACKUP_ENABLED
+RDS_RESOURCES_PROTECTED_BY_BACKUP_PLAN
+DYNAMODB_RESOURCES_PROTECTED_BY_BACKUP_PLAN
+EC2_RESOURCES_PROTECTED_BY_BACKUP_PLAN
+EBS_RESOURCES_PROTECTED_BY_BACKUP_PLAN
+EFS_RESOURCES_PROTECTED_BY_BACKUP_PLAN
+FSX_RESOURCES_PROTECTED_BY_BACKUP_PLAN
+AURORA_RESOURCES_PROTECTED_BY_BACKUP_PLAN
+BACKUP_PLAN_MIN_FREQUENCY_AND_MIN_RETENTION_CHECK
+BACKUP_RECOVERY_POINT_MANUAL_DELETION_DISABLED
+BACKUP_RECOVERY_POINT_MINIMUM_RETENTION_CHECK
+BACKUP_RECOVERY_POINT_ENCRYPTED
+IAM_GROUP_HAS_USERS_CHECK
+IAM_POLICY_BLACKLISTED_CHECK
+IAM_POLICY_IN_USE
+IAM_POLICY_NO_STATEMENTS_WITH_ADMIN_ACCESS
+IAM_ROLE_MANAGED_POLICY_CHECK
+IAM_USER_GROUP_MEMBERSHIP_CHECK
+IAM_USER_NO_POLICIES_CHECK
+IAM_USER_UNUSED_CREDENTIALS_CHECK
+IAM_NO_INLINE_POLICY_CHECK
+RDS_INSTANCE_IAM_AUTHENTICATION_ENABLED
+API_GW_CACHE_ENABLED_AND_ENCRYPTED
+CLOUD_TRAIL_ENCRYPTION_ENABLED
+CLOUDWATCH_LOG_GROUP_ENCRYPTED
+EFS_ENCRYPTED_CHECK
+ELASTICSEARCH_ENCRYPTED_AT_REST
+ENCRYPTED_VOLUMES
+RDS_STORAGE_ENCRYPTED
+REDSHIFT_CLUSTER_CONFIGURATION_CHECK
+S3_BUCKET_SERVER_SIDE_ENCRYPTION_ENABLED
+SAGEMAKER_ENDPOINT_CONFIGURATION_KMS_KEY_CONFIGURED
+SAGEMAKER_NOTEBOOK_INSTANCE_KMS_KEY_CONFIGURED
+SNS_ENCRYPTED_KMS
+EC2_EBS_ENCRYPTION_BY_DEFAULT
+DYNAMODB_TABLE_ENCRYPTED_KMS
+DYNAMODB_TABLE_ENCRYPTION_ENABLED
+RDS_SNAPSHOT_ENCRYPTED
+S3_DEFAULT_ENCRYPTION_KMS
+DAX_ENCRYPTION_ENABLED
+EKS_SECRETS_ENCRYPTED
+RDS_LOGGING_ENABLED
+WAF_CLASSIC_LOGGING_ENABLED
+WAFV2_LOGGING_ENABLED
+ALB_HTTP_TO_HTTPS_REDIRECTION_CHECK
+ELB_ACM_CERTIFICATE_REQUIRED
+ELB_CUSTOM_SECURITY_POLICY_SSL_CHECK
+REDSHIFT_REQUIRE_TLS_SSL
+CLOUDFRONT_VIEWER_POLICY_HTTPS
+ALB_HTTP_DROP_INVALID_HEADER_ENABLED
+ELASTICSEARCH_NODE_TO_NODE_ENCRYPTION_CHECK
+ELB_TLS_HTTPS_LISTENERS_ONLY
+ACM_CERTIFICATE_EXPIRATION_CHECK
+
+Learn more at:
+https://docs.aws.amazon.com/config/latest/developerguide/managed-rules-by-aws-config.html
+https://docs.aws.amazon.com/config/latest/developerguide/managed-rules-by-aws-config.html",,AUTOMATED,"{
+
+
+""events"": [
+
+
+{ ""eventSelector"": ""DB_INSTANCE_BACKUP_ENABLED"", ""eventSourceName"": ""CloudTrail-Config"" },
+
+
+{ ""eventSelector"": ""DYNAMODB_PITR_ENABLED"", ""eventSourceName"": ""CloudTrail-Config"" },
+
+
+{ ""eventSelector"": ""ELASTICACHE_REDIS_CLUSTER_AUTOMATIC_BACKUP_CHECK"", ""eventSourceName"": ""CloudTrail-Config"" },
+
+
+{ ""eventSelector"": ""S3_BUCKET_REPLICATION_ENABLED"", ""eventSourceName"": ""CloudTrail-Config"" },
+
+
+{ ""eventSelector"": ""DYNAMODB_IN_BACKUP_PLAN"", ""eventSourceName"": ""CloudTrail-Config"" },
+
+
+{ ""eventSelector"": ""EBS_IN_BACKUP_PLAN"", ""eventSourceName"": ""CloudTrail-Config"" },
+
+
+{ ""eventSelector"": ""EFS_IN_BACKUP_PLAN"", ""eventSourceName"": ""CloudTrail-Config"" },
+
+
+{ ""eventSelector"": ""RDS_IN_BACKUP_PLAN"", ""eventSourceName"": ""CloudTrail-Config"" },
+
+
+{ ""eventSelector"": ""REDSHIFT_BACKUP_ENABLED"", ""eventSourceName"": ""CloudTrail-Config"" },
+
+
+{ ""eventSelector"": ""RDS_RESOURCES_PROTECTED_BY_BACKUP_PLAN"", ""eventSourceName"": ""CloudTrail-Config"" },
+
+
+{ ""eventSelector"": ""DYNAMODB_RESOURCES_PROTECTED_BY_BACKUP_PLAN"", ""eventSourceName"": ""CloudTrail-Config"" },
+
+
+{ ""eventSelector"": ""EC2_RESOURCES_PROTECTED_BY_BACKUP_PLAN"", ""eventSourceName"": ""CloudTrail-Config"" },
+
+
+{ ""eventSelector"": ""EBS_RESOURCES_PROTECTED_BY_BACKUP_PLAN"", ""eventSourceName"": ""CloudTrail-Config"" },
+
+
+{ ""eventSelector"": ""EFS_RESOURCES_PROTECTED_BY_BACKUP_PLAN"", ""eventSourceName"": ""CloudTrail-Config"" },
+
+
+{ ""eventSelector"": ""FSX_RESOURCES_PROTECTED_BY_BACKUP_PLAN"", ""eventSourceName"": ""CloudTrail-Config"" },
+
+
+{ ""eventSelector"": ""AURORA_RESOURCES_PROTECTED_BY_BACKUP_PLAN"", ""eventSourceName"": ""CloudTrail-Config"" },
+
+
+{ ""eventSelector"": ""BACKUP_PLAN_MIN_FREQUENCY_AND_MIN_RETENTION_CHECK"", ""eventSourceName"": ""CloudTrail-Config"" },
+
+
+{ ""eventSelector"": ""BACKUP_RECOVERY_POINT_MANUAL_DELETION_DISABLED"", ""eventSourceName"": ""CloudTrail-Config"" },
+
+
+{ ""eventSelector"": ""BACKUP_RECOVERY_POINT_MINIMUM_RETENTION_CHECK"", ""eventSourceName"": ""CloudTrail-Config"" },
+
+
+{ ""eventSelector"": ""BACKUP_RECOVERY_POINT_ENCRYPTED"", ""eventSourceName"": ""CloudTrail-Config"" },
+
+
+{
+
+
+""eventSelector"": ""IAM_GROUP_HAS_USERS_CHECK"",
+
+
+""eventSourceName"": ""CloudTrail-Config""
+
+
+},
+
+
+{
+
+
+""eventSelector"": ""IAM_POLICY_BLACKLISTED_CHECK"",
+
+
+""eventSourceName"": ""CloudTrail-Config""
+
+
+},
+
+
+{
+
+
+""eventSelector"": ""IAM_POLICY_IN_USE"",
+
+
+""eventSourceName"": ""CloudTrail-Config""
+
+
+},
+
+
+{
+
+
+""eventSelector"": ""IAM_POLICY_NO_STATEMENTS_WITH_ADMIN_ACCESS"",
+
+
+""eventSourceName"": ""CloudTrail-Config""
+
+
+},
+
+
+{
+
+
+""eventSelector"": ""IAM_ROLE_MANAGED_POLICY_CHECK"",
+
+
+""eventSourceName"": ""CloudTrail-Config""
+
+
+},
+
+
+{
+
+
+""eventSelector"": ""IAM_USER_GROUP_MEMBERSHIP_CHECK"",
+
+
+""eventSourceName"": ""CloudTrail-Config""
+
+
+},
+
+
+{
+
+
+""eventSelector"": ""IAM_USER_NO_POLICIES_CHECK"",
+
+
+""eventSourceName"": ""CloudTrail-Config""
+
+
+},
+
+
+{
+
+
+""eventSelector"": ""IAM_USER_UNUSED_CREDENTIALS_CHECK"",
+
+
+""eventSourceName"": ""CloudTrail-Config""
+
+
+},
+
+
+{
+
+
+""eventSelector"": ""IAM_NO_INLINE_POLICY_CHECK"",
+
+
+""eventSourceName"": ""CloudTrail-Config""
+
+
+},
+
+
+{
+
+
+""eventSelector"": ""RDS_INSTANCE_IAM_AUTHENTICATION_ENABLED"",
+
+
+""eventSourceName"": ""CloudTrail-Config""
+
+
+},
+
+
+{
+
+
+""eventSelector"": ""API_GW_CACHE_ENABLED_AND_ENCRYPTED"",
+
+
+""eventSourceName"": ""CloudTrail-Config""
+
+
+},
+
+
+{
+
+
+""eventSelector"": ""CLOUD_TRAIL_ENCRYPTION_ENABLED"",
+
+
+""eventSourceName"": ""CloudTrail-Config""
+
+
+},
+
+
+{
+
+
+""eventSelector"": ""CLOUDWATCH_LOG_GROUP_ENCRYPTED"",
+
+
+""eventSourceName"": ""CloudTrail-Config""
+
+
+},
+
+
+{
+
+
+""eventSelector"": ""EFS_ENCRYPTED_CHECK"",
+
+
+""eventSourceName"": ""CloudTrail-Config""
+
+
+},
+
+
+{
+
+
+""eventSelector"": ""ELASTICSEARCH_ENCRYPTED_AT_REST"",
+
+
+""eventSourceName"": ""CloudTrail-Config""
+
+
+},
+
+
+{
+
+
+""eventSelector"": ""ENCRYPTED_VOLUMES"",
+
+
+""eventSourceName"": ""CloudTrail-Config""
+
+
+},
+
+
+{
+
+
+""eventSelector"": ""RDS_STORAGE_ENCRYPTED"",
+
+
+""eventSourceName"": ""CloudTrail-Config""
+
+
+},
+
+
+{
+
+
+""eventSelector"": ""REDSHIFT_CLUSTER_CONFIGURATION_CHECK"",
+
+
+""eventSourceName"": ""CloudTrail-Config""
+
+
+},
+
+
+{
+
+
+""eventSelector"": ""S3_BUCKET_SERVER_SIDE_ENCRYPTION_ENABLED"",
+
+
+""eventSourceName"": ""CloudTrail-Config""
+
+
+},
+
+
+{
+
+
+""eventSelector"": ""SAGEMAKER_ENDPOINT_CONFIGURATION_KMS_KEY_CONFIGURED"",
+
+
+""eventSourceName"": ""CloudTrail-Config""
+
+
+},
+
+
+{
+
+
+""eventSelector"": ""SAGEMAKER_NOTEBOOK_INSTANCE_KMS_KEY_CONFIGURED"",
+
+
+""eventSourceName"": ""CloudTrail-Config""
+
+
+},
+
+
+{
+
+
+""eventSelector"": ""SNS_ENCRYPTED_KMS"",
+
+
+""eventSourceName"": ""CloudTrail-Config""
+
+
+},
+
+
+{
+
+
+""eventSelector"": ""EC2_EBS_ENCRYPTION_BY_DEFAULT"",
+
+
+""eventSourceName"": ""CloudTrail-Config""
+
+
+},
+
+
+{
+
+
+""eventSelector"": ""DYNAMODB_TABLE_ENCRYPTED_KMS"",
+
+
+""eventSourceName"": ""CloudTrail-Config""
+
+
+},
+
+
+{
+
+
+""eventSelector"": ""DYNAMODB_TABLE_ENCRYPTION_ENABLED"",
+
+
+""eventSourceName"": ""CloudTrail-Config""
+
+
+},
+
+
+{
+
+
+""eventSelector"": ""RDS_SNAPSHOT_ENCRYPTED"",
+
+
+""eventSourceName"": ""CloudTrail-Config""
+
+
+},
+
+
+{
+
+
+""eventSelector"": ""S3_DEFAULT_ENCRYPTION_KMS"",
+
+
+""eventSourceName"": ""CloudTrail-Config""
+
+
+},
+
+
+{
+
+
+""eventSelector"": ""DAX_ENCRYPTION_ENABLED"",
+
+
+""eventSourceName"": ""CloudTrail-Config""
+
+
+},
+
+
+{
+
+
+""eventSelector"": ""EKS_SECRETS_ENCRYPTED"",
+
+
+""eventSourceName"": ""CloudTrail-Config""
+
+
+},
+
+
+{
+
+
+""eventSelector"": ""RDS_LOGGING_ENABLED"",
+
+
+""eventSourceName"": ""CloudTrail-Config""
+
+
+},
+
+
+{
+
+
+""eventSelector"": ""WAF_CLASSIC_LOGGING_ENABLED"",
+
+
+""eventSourceName"": ""CloudTrail-Config""
+
+
+},
+
+
+{
+
+
+""eventSelector"": ""WAFV2_LOGGING_ENABLED"",
+
+
+""eventSourceName"": ""CloudTrail-Config""
+
+
+},
+
+
+{
+
+
+""eventSelector"": ""ALB_HTTP_TO_HTTPS_REDIRECTION_CHECK"",
+
+
+""eventSourceName"": ""CloudTrail-Config""
+
+
+},
+
+
+{
+
+
+""eventSelector"": ""ELB_ACM_CERTIFICATE_REQUIRED"",
+
+
+""eventSourceName"": ""CloudTrail-Config""
+
+
+},
+
+
+{
+
+
+""eventSelector"": ""ELB_CUSTOM_SECURITY_POLICY_SSL_CHECK"",
+
+
+""eventSourceName"": ""CloudTrail-Config""
+
+
+},
+
+
+{
+
+
+""eventSelector"": ""REDSHIFT_REQUIRE_TLS_SSL"",
+
+
+""eventSourceName"": ""CloudTrail-Config""
+
+
+},
+
+
+{
+
+
+""eventSelector"": ""CLOUDFRONT_VIEWER_POLICY_HTTPS"",
+
+
+""eventSourceName"": ""CloudTrail-Config""
+
+
+},
+
+
+{
+
+
+""eventSelector"": ""ALB_HTTP_DROP_INVALID_HEADER_ENABLED"",
+
+
+""eventSourceName"": ""CloudTrail-Config""
+
+
+},
+
+
+{
+
+
+""eventSelector"": ""ELASTICSEARCH_NODE_TO_NODE_ENCRYPTION_CHECK"",
+
+
+""eventSourceName"": ""CloudTrail-Config""
+
+
+},
+
+
+{
+
+
+""eventSelector"": ""ELB_TLS_HTTPS_LISTENERS_ONLY"",
+
+
+""eventSourceName"": ""CloudTrail-Config""
+
+
+},
+
+
+{
+
+
+""eventSelector"": ""ACM_CERTIFICATE_EXPIRATION_CHECK"",
+
+
+""eventSourceName"": ""CloudTrail-Config""
+
+
+}
+
+
+]
+
+
+}
+
+
+",Third Party Software Risk Automated Assessment Template,Third Party Software Risk Automated Assessment,Third Party Software Risk Assessment is used for gathering information required to assess risks and threats in a third party softwares. This template is a subset of the Third Party Software Risk Assessment Template. This is used to gather evidence automatically from your AWS accounts that are used for hosting your SaaS solutions.,,,ACTIVE,buyer.svg,AWS Custom Risk Asssessment,AWS,https://aws.amazon.com/marketplace/
+Application Security 4.2.3 - Application Security Review - Security Patches,Everest Automated - Appsec 4.2.3,Application Security,Development and configuration management,AWS Config,Are all available high-risk security patches applied and verified regularly?,,ACTIVE,,"Specify if high-risk security patches are applied regularly. If yes, how often are they applied?
+
+AWS Config Rule(s):
+
+EC2_MANAGEDINSTANCE_PATCH_COMPLIANCE_STATUS_CHECK
+EC2_INSTANCE_MANAGED_BY_SSM
+EC2_MANAGEDINSTANCE_ASSOCIATION_COMPLIANCE_STATUS_CHECK
+
+Learn more at: https://docs.aws.amazon.com/config/latest/developerguide/managed-rules-by-aws-config.html
+
+Review Inspector Reports
+
+Learn more at: https://docs.aws.amazon.com/cli/latest/reference/ssm/describe-instance-patch-states.html
+",,AUTOMATED,"{""events"": [
+{ ""eventSelector"": ""EC2_MANAGEDINSTANCE_PATCH_COMPLIANCE_STATUS_CHECK"", ""eventSourceName"": ""CloudTrail-Config"" },
+
+
+{ ""eventSelector"": ""EC2_INSTANCE_MANAGED_BY_SSM"", ""eventSourceName"": ""CloudTrail-Config"" },
+
+
+{ ""eventSelector"": ""EC2_MANAGEDINSTANCE_ASSOCIATION_COMPLIANCE_STATUS_CHECK"", ""eventSourceName"": ""CloudTrail-Config"" }
+]}",Third Party Software Risk Automated Assessment Template,Third Party Software Risk Automated Assessment,Third Party Software Risk Assessment is used for gathering information required to assess risks and threats in a third party softwares. This template is a subset of the Third Party Software Risk Assessment Template. This is used to gather evidence automatically from your AWS accounts that are used for hosting your SaaS solutions.,,,ACTIVE,buyer.svg,AWS Custom Risk Asssessment,AWS,https://aws.amazon.com/marketplace/
+Application Security 4.3.1 - Application Logs - Application Logs,Everest Automated - Appsec 4.3.1,Application Security,Development and configuration management,AWS Config,Are application logs collected and reviewed?,,ACTIVE,,"Specify if application logs are collected and reviewed. If yes, how long are the logs retained?
+
+AWS Config Rule(s): 
+
+API_GW_EXECUTION_LOGGING_ENABLED
+CLOUD_TRAIL_CLOUD_WATCH_LOGS_ENABLED
+CLOUD_TRAIL_ENABLED
+CLOUDTRAIL_S3_DATAEVENTS_ENABLED
+ELB_LOGGING_ENABLED
+MULTI_REGION_CLOUD_TRAIL_ENABLED
+S3_BUCKET_LOGGING_ENABLED
+VPC_FLOW_LOGS_ENABLED
+RDS_LOGGING_ENABLED
+WAF_CLASSIC_LOGGING_ENABLED
+WAFV2_LOGGING_ENABLED
+REDSHIFT_CLUSTER_CONFIGURATION_CHECK
+CLOUD_TRAIL_ENCRYPTION_ENABLED
+
+Learn more at: https://docs.aws.amazon.com/config/latest/developerguide/managed-rules-by-aws-config.html
+",,AUTOMATED,"{
+""events"": [
+{""eventSelector"": ""CLOUD_TRAIL_ENCRYPTION_ENABLED"",
+""eventSourceName"": ""CloudTrail-Config""},
+{
+""eventSelector"": ""API_GW_EXECUTION_LOGGING_ENABLED"",
+""eventSourceName"": ""CloudTrail-Config""
+},
+{
+""eventSelector"": ""CLOUD_TRAIL_CLOUD_WATCH_LOGS_ENABLED"",
+""eventSourceName"": ""CloudTrail-Config""
+},
+{
+""eventSelector"": ""CLOUD_TRAIL_ENABLED"",
+""eventSourceName"": ""CloudTrail-Config""
+},
+{
+""eventSelector"": ""CLOUDTRAIL_S3_DATAEVENTS_ENABLED"",
+""eventSourceName"": ""CloudTrail-Config""
+},
+{
+""eventSelector"": ""ELB_LOGGING_ENABLED"",
+""eventSourceName"": ""CloudTrail-Config""
+},
+{
+""eventSelector"": ""MULTI_REGION_CLOUD_TRAIL_ENABLED"",
+""eventSourceName"": ""CloudTrail-Config""
+},
+{
+""eventSelector"": ""S3_BUCKET_LOGGING_ENABLED"",
+""eventSourceName"": ""CloudTrail-Config""
+},
+{
+""eventSelector"": ""RDS_LOGGING_ENABLED"",
+""eventSourceName"": ""CloudTrail-Config""
+},
+{
+""eventSelector"": ""REDSHIFT_CLUSTER_CONFIGURATION_CHECK"",
+""eventSourceName"": ""CloudTrail-Config""
+}
+]
+}",Third Party Software Risk Automated Assessment Template,Third Party Software Risk Automated Assessment,Third Party Software Risk Assessment is used for gathering information required to assess risks and threats in a third party softwares. This template is a subset of the Third Party Software Risk Assessment Template. This is used to gather evidence automatically from your AWS accounts that are used for hosting your SaaS solutions.,,,ACTIVE,buyer.svg,AWS Custom Risk Asssessment,AWS,https://aws.amazon.com/marketplace/
+Application Security 4.3.2 - Application Logs - Access to Logs,Everest Automated - Appsec 4.3.2,Application Security,Development and configuration management,AWS Config,"Are operating system and application logs protected against modification, deletion, and/or inappropriate access?",,ACTIVE,,"Specify if operating system and application logs are protected against modification, deleted and/or inappropriate access. In the event of a breach/incident, do you have processes in place to detect loss of application logs?
+
+AWS Config Rules: 
+CLOUD_TRAIL_LOG_FILE_VALIDATION_ENABLED
+S3_BUCKET_VERSIONING_ENABLED
+",,AUTOMATED,"{
+    ""events"": [
+       {""eventSelector"": ""CLOUD_TRAIL_LOG_FILE_VALIDATION_ENABLED"",
+""eventSourceName"": ""CloudTrail-Config""},
+        {
+            ""eventSelector"": ""S3_BUCKET_VERSIONING_ENABLED"",
+            ""eventSourceName"": ""CloudTrail-Config""
+        }
+    ]
+}",Third Party Software Risk Automated Assessment Template,Third Party Software Risk Automated Assessment,Third Party Software Risk Assessment is used for gathering information required to assess risks and threats in a third party softwares. This template is a subset of the Third Party Software Risk Assessment Template. This is used to gather evidence automatically from your AWS accounts that are used for hosting your SaaS solutions.,,,ACTIVE,buyer.svg,AWS Custom Risk Asssessment,AWS,https://aws.amazon.com/marketplace/
+Application Security 4.4.2 - Change Control Policy - Change Control Procedures,Everest Automated - Appsec 4.4.2,Application Security,Development and configuration management,AWS Config,Are change control procedures required for all changes to the production environment?,,ACTIVE,,"Specify if change control procedures are in place for all changes made in the production environment.
+
+AWS Config Rule(s): 
+
+CLOUD_TRAIL_ENABLED
+
+Learn more at: https://docs.aws.amazon.com/config/latest/developerguide/managed-rules-by-aws-config.html",,AUTOMATED,"{
+    ""events"": [
+
+{ ""eventSelector"": ""CLOUD_TRAIL_ENABLED"", ""eventSourceName"": ""CloudTrail-Config"" }
+    ]
+}
+
+",Third Party Software Risk Automated Assessment Template,Third Party Software Risk Automated Assessment,Third Party Software Risk Assessment is used for gathering information required to assess risks and threats in a third party softwares. This template is a subset of the Third Party Software Risk Assessment Template. This is used to gather evidence automatically from your AWS accounts that are used for hosting your SaaS solutions.,,,ACTIVE,buyer.svg,AWS Custom Risk Asssessment,AWS,https://aws.amazon.com/marketplace/
+Risk Management/Incident Response 5.1.2 - Risk Assessment - Risk Management Process,Everest Automated - IR 5.1.2,Risk Management/Incident Response,Risk management,AWS Config,Is there a program or process to manage the treatment of risks identified during assessments?,,ACTIVE,,"Specify if there is a program or process to manage risks and their mitigations. 
+
+AWS Config Rule(s): 
+
+SECURITYHUB_ENABLED
+CLOUD_TRAIL_ENABLED
+
+Learn more at: https://docs.aws.amazon.com/config/latest/developerguide/managed-rules-by-aws-config.html
+",,AUTOMATED,"{
+    ""events"": [
+{ ""eventSelector"": ""SECURITYHUB_ENABLED"", ""eventSourceName"": ""CloudTrail-Config"" },
+
+
+{ ""eventSelector"": ""CLOUD_TRAIL_ENABLED"", ""eventSourceName"": ""CloudTrail-Config"" }
+    ]
+}
+
+",Third Party Software Risk Automated Assessment Template,Third Party Software Risk Automated Assessment,Third Party Software Risk Assessment is used for gathering information required to assess risks and threats in a third party softwares. This template is a subset of the Third Party Software Risk Assessment Template. This is used to gather evidence automatically from your AWS accounts that are used for hosting your SaaS solutions.,,,ACTIVE,buyer.svg,AWS Custom Risk Asssessment,AWS,https://aws.amazon.com/marketplace/
+Risk Management/Incident Response 5.2.4 - Incident Management - Incident Recovery,Everest Automated - IR 5.2.4,Risk Management/Incident Response,Risk management,AWS Config,Do you have disaster recovery plans?,,ACTIVE,,"Specify if you have plans for recovery after an incident occurs. If yes, can you share details about the recovery plans?
+
+AWS Config Rule(s): 
+
+DYNAMODB_AUTOSCALING_ENABLED
+ELB_DELETION_PROTECTION_ENABLED
+RDS_MULTI_AZ_SUPPORT
+S3_BUCKET_VERSIONING_ENABLED
+VPC_VPN_2_TUNNELS_UP
+DB_INSTANCE_BACKUP_ENABLED
+DYNAMODB_PITR_ENABLED
+ELASTICACHE_REDIS_CLUSTER_AUTOMATIC_BACKUP_CHECK
+S3_BUCKET_REPLICATION_ENABLED
+DYNAMODB_IN_BACKUP_PLAN
+EBS_IN_BACKUP_PLAN
+EFS_IN_BACKUP_PLAN
+ELB_CROSS_ZONE_LOAD_BALANCING_ENABLED
+RDS_IN_BACKUP_PLAN
+REDSHIFT_BACKUP_ENABLED
+RDS_RESOURCES_PROTECTED_BY_BACKUP_PLAN
+DYNAMODB_RESOURCES_PROTECTED_BY_BACKUP_PLAN
+EC2_RESOURCES_PROTECTED_BY_BACKUP_PLAN
+EBS_RESOURCES_PROTECTED_BY_BACKUP_PLAN
+EFS_RESOURCES_PROTECTED_BY_BACKUP_PLAN
+FSX_RESOURCES_PROTECTED_BY_BACKUP_PLAN
+AURORA_RESOURCES_PROTECTED_BY_BACKUP_PLAN
+BACKUP_PLAN_MIN_FREQUENCY_AND_MIN_RETENTION_CHECK
+BACKUP_RECOVERY_POINT_MANUAL_DELETION_DISABLED
+BACKUP_RECOVERY_POINT_MINIMUM_RETENTION_CHECK
+BACKUP_RECOVERY_POINT_ENCRYPTED
+
+Learn more at: https://docs.aws.amazon.com/config/latest/developerguide/managed-rules-by-aws-config.html
+
+
+",,AUTOMATED,"{
+    ""events"": [
+
+{ ""eventSelector"": ""DYNAMODB_AUTOSCALING_ENABLED"", ""eventSourceName"": ""CloudTrail-Config"" },
+
+
+{ ""eventSelector"": ""ELB_DELETION_PROTECTION_ENABLED"", ""eventSourceName"": ""CloudTrail-Config"" },
+
+
+{ ""eventSelector"": ""RDS_MULTI_AZ_SUPPORT"", ""eventSourceName"": ""CloudTrail-Config"" },
+
+
+{ ""eventSelector"": ""S3_BUCKET_VERSIONING_ENABLED"", ""eventSourceName"": ""CloudTrail-Config"" },
+
+
+{ ""eventSelector"": ""VPC_VPN_2_TUNNELS_UP"", ""eventSourceName"": ""CloudTrail-Config"" },
+
+
+{ ""eventSelector"": ""DB_INSTANCE_BACKUP_ENABLED"", ""eventSourceName"": ""CloudTrail-Config"" },
+
+
+{ ""eventSelector"": ""DYNAMODB_PITR_ENABLED"", ""eventSourceName"": ""CloudTrail-Config"" },
+
+
+{ ""eventSelector"": ""ELASTICACHE_REDIS_CLUSTER_AUTOMATIC_BACKUP_CHECK"", ""eventSourceName"": ""CloudTrail-Config"" },
+
+
+{ ""eventSelector"": ""S3_BUCKET_REPLICATION_ENABLED"", ""eventSourceName"": ""CloudTrail-Config"" },
+
+
+{ ""eventSelector"": ""DYNAMODB_IN_BACKUP_PLAN"", ""eventSourceName"": ""CloudTrail-Config"" },
+
+
+{ ""eventSelector"": ""EBS_IN_BACKUP_PLAN"", ""eventSourceName"": ""CloudTrail-Config"" },
+
+
+{ ""eventSelector"": ""EFS_IN_BACKUP_PLAN"", ""eventSourceName"": ""CloudTrail-Config"" },
+
+
+{ ""eventSelector"": ""ELB_CROSS_ZONE_LOAD_BALANCING_ENABLED"", ""eventSourceName"": ""CloudTrail-Config"" },
+
+
+{ ""eventSelector"": ""RDS_IN_BACKUP_PLAN"", ""eventSourceName"": ""CloudTrail-Config"" },
+
+{ ""eventSelector"": ""REDSHIFT_BACKUP_ENABLED"", ""eventSourceName"": ""CloudTrail-Config"" },
+
+{ ""eventSelector"": ""RDS_RESOURCES_PROTECTED_BY_BACKUP_PLAN"", ""eventSourceName"": ""CloudTrail-Config"" },
+
+
+{ ""eventSelector"": ""DYNAMODB_RESOURCES_PROTECTED_BY_BACKUP_PLAN"", ""eventSourceName"": ""CloudTrail-Config"" },
+
+
+{ ""eventSelector"": ""EC2_RESOURCES_PROTECTED_BY_BACKUP_PLAN"", ""eventSourceName"": ""CloudTrail-Config"" },
+
+
+{ ""eventSelector"": ""EBS_RESOURCES_PROTECTED_BY_BACKUP_PLAN"", ""eventSourceName"": ""CloudTrail-Config"" },
+
+
+{ ""eventSelector"": ""EFS_RESOURCES_PROTECTED_BY_BACKUP_PLAN"", ""eventSourceName"": ""CloudTrail-Config"" },
+
+
+{ ""eventSelector"": ""FSX_RESOURCES_PROTECTED_BY_BACKUP_PLAN"", ""eventSourceName"": ""CloudTrail-Config"" },
+
+
+{ ""eventSelector"": ""AURORA_RESOURCES_PROTECTED_BY_BACKUP_PLAN"", ""eventSourceName"": ""CloudTrail-Config"" },
+
+
+{ ""eventSelector"": ""BACKUP_PLAN_MIN_FREQUENCY_AND_MIN_RETENTION_CHECK"", ""eventSourceName"": ""CloudTrail-Config"" },
+
+
+{ ""eventSelector"": ""BACKUP_RECOVERY_POINT_MANUAL_DELETION_DISABLED"", ""eventSourceName"": ""CloudTrail-Config"" },
+
+
+{ ""eventSelector"": ""BACKUP_RECOVERY_POINT_MINIMUM_RETENTION_CHECK"", ""eventSourceName"": ""CloudTrail-Config"" },
+
+
+{ ""eventSelector"": ""BACKUP_RECOVERY_POINT_ENCRYPTED"", ""eventSourceName"": ""CloudTrail-Config"" }
+
+    ]
+}",Third Party Software Risk Automated Assessment Template,Third Party Software Risk Automated Assessment,Third Party Software Risk Assessment is used for gathering information required to assess risks and threats in a third party softwares. This template is a subset of the Third Party Software Risk Assessment Template. This is used to gather evidence automatically from your AWS accounts that are used for hosting your SaaS solutions.,,,ACTIVE,buyer.svg,AWS Custom Risk Asssessment,AWS,https://aws.amazon.com/marketplace/
+Risk Management/Incident Response 5.3.1 - Incident Detection - Comprehensive Logging,Everest Automated - IR 5.3.1,Risk Management/Incident Response,Risk management,AWS Config,Is there comprehensive logging to support the identification and mitigation of incidents?,,ACTIVE,,"Specify if there is comprehensive logging enabled. Identify the types of events that the system is capable of logging. How long are logs retained?
+
+AWS Config Rule(s): 
+
+API_GW_EXECUTION_LOGGING_ENABLED
+CLOUD_TRAIL_CLOUD_WATCH_LOGS_ENABLED
+CLOUDTRAIL_S3_DATAEVENTS_ENABLED
+CLOUD_TRAIL_ENABLED
+ELB_LOGGING_ENABLED
+MULTI_REGION_CLOUD_TRAIL_ENABLED
+S3_BUCKET_LOGGING_ENABLED
+VPC_FLOW_LOGS_ENABLED
+RDS_LOGGING_ENABLED
+WAFV2_LOGGING_ENABLED
+REDSHIFT_CLUSTER_CONFIGURATION_CHECK
+
+Learn more at: https://docs.aws.amazon.com/config/latest/developerguide/managed-rules-by-aws-config.html
+
+",,AUTOMATED,"{
+    ""events"": [
+
+{ ""eventSelector"": ""API_GW_EXECUTION_LOGGING_ENABLED"", ""eventSourceName"": ""CloudTrail-Config"" },
+
+
+{ ""eventSelector"": ""CLOUD_TRAIL_CLOUD_WATCH_LOGS_ENABLED"", ""eventSourceName"": ""CloudTrail-Config"" },
+
+
+{ ""eventSelector"": ""CLOUDTRAIL_S3_DATAEVENTS_ENABLED"", ""eventSourceName"": ""CloudTrail-Config"" },
+
+
+{ ""eventSelector"": ""CLOUD_TRAIL_ENABLED"", ""eventSourceName"": ""CloudTrail-Config"" },
+
+
+{ ""eventSelector"": ""ELB_LOGGING_ENABLED"", ""eventSourceName"": ""CloudTrail-Config"" },
+
+
+{ ""eventSelector"": ""MULTI_REGION_CLOUD_TRAIL_ENABLED"", ""eventSourceName"": ""CloudTrail-Config"" },
+
+
+{ ""eventSelector"": ""S3_BUCKET_LOGGING_ENABLED"", ""eventSourceName"": ""CloudTrail-Config"" },
+
+
+{ ""eventSelector"": ""VPC_FLOW_LOGS_ENABLED"", ""eventSourceName"": ""CloudTrail-Config"" },
+
+
+{ ""eventSelector"": ""RDS_LOGGING_ENABLED"", ""eventSourceName"": ""CloudTrail-Config"" },
+
+
+{ ""eventSelector"": ""WAFV2_LOGGING_ENABLED"", ""eventSourceName"": ""CloudTrail-Config"" },
+
+
+{ ""eventSelector"": ""REDSHIFT_CLUSTER_CONFIGURATION_CHECK"", ""eventSourceName"": ""CloudTrail-Config"" }
+
+    ]
+}",Third Party Software Risk Automated Assessment Template,Third Party Software Risk Automated Assessment,Third Party Software Risk Assessment is used for gathering information required to assess risks and threats in a third party softwares. This template is a subset of the Third Party Software Risk Assessment Template. This is used to gather evidence automatically from your AWS accounts that are used for hosting your SaaS solutions.,,,ACTIVE,buyer.svg,AWS Custom Risk Asssessment,AWS,https://aws.amazon.com/marketplace/
+Business Resiliency and Continuity 6.1.6 - Business Resiliency - Health of the System,Everest Automated - BC 6.1.6,Business Resiliency & Continuity,Business continuity and contingency planning,AWS Config,Do you have monitors/alerts to understand the health of the system?,,ACTIVE,,"Specify if monitors or alerts are in place to understand the health of the system.
+
+AWS Config Rules : 
+AUTOSCALING_GROUP_ELB_HEALTHCHECK_REQUIRED",,AUTOMATED,"{
+    ""events"": [
+       {""eventSelector"": ""AUTOSCALING_GROUP_ELB_HEALTHCHECK_REQUIRED"",
+""eventSourceName"": ""CloudTrail-Config""}
+    ]
+}",Third Party Software Risk Automated Assessment Template,Third Party Software Risk Automated Assessment,Third Party Software Risk Assessment is used for gathering information required to assess risks and threats in a third party softwares. This template is a subset of the Third Party Software Risk Assessment Template. This is used to gather evidence automatically from your AWS accounts that are used for hosting your SaaS solutions.,,,ACTIVE,buyer.svg,AWS Custom Risk Asssessment,AWS,https://aws.amazon.com/marketplace/
+End User Device Security 7.1.1 - Asset/Software Inventory - Asset Inventory,Everest Automated - ES 7.1.1,End User Device Security,User device management,"AWS Config, API Calls",Is the asset inventory list updated periodically?,,ACTIVE,,"Specify if an asset inventory is maintained. If yes, how often is it updated?
+
+ AWS Config Rule(s): 
+
+ REQUIRED_TAGS
+ EC2_INSTANCE_MANAGED_BY_SSM
+
+ Learn more at: https://docs.aws.amazon.com/config/latest/developerguide/managed-rules-by-aws-config.html
+
+ List systems inventory",,AUTOMATED,"{
+ ""events"": [
+{""eventSelector"": ""MULTI_REGION_CLOUD_TRAIL_ENABLED"",
+""eventSourceName"": ""CloudTrail-Config""},
+ {
+ ""eventSelector"": ""CLOUD_TRAIL_ENCRYPTION_ENABLED"",
+ ""eventSourceName"": ""CloudTrail-Config""
+ },
+ {
+ ""eventSelector"": ""CLOUD_TRAIL_LOG_FILE_VALIDATION_ENABLED"",
+ ""eventSourceName"": ""CloudTrail-Config""
+ },
+ {
+ ""eventSelector"": ""VPC_FLOW_LOGS_ENABLED"",
+ ""eventSourceName"": ""CloudTrail-Config""
+ },
+ {
+ ""eventSelector"": ""cloudtrail_DescribeTrails"",
+ ""eventSourceName"": ""S2S"",
+ ""eventInputConfig"": {
+ ""Action"": ""describeTrails"",
+ ""Service"": ""cloudtrail"" 
+ }
+ },
+{ ""eventSelector"": ""REQUIRED_TAGS"", ""eventSourceName"": ""CloudTrail-Config"" },
+{ ""eventSelector"": ""EC2_INSTANCE_MANAGED_BY_SSM"", ""eventSourceName"": ""CloudTrail-Config"" }
+ ]
+ }",Third Party Software Risk Automated Assessment Template,Third Party Software Risk Automated Assessment,Third Party Software Risk Assessment is used for gathering information required to assess risks and threats in a third party softwares. This template is a subset of the Third Party Software Risk Assessment Template. This is used to gather evidence automatically from your AWS accounts that are used for hosting your SaaS solutions.,,,ACTIVE,buyer.svg,AWS Custom Risk Asssessment,AWS,https://aws.amazon.com/marketplace/
+End User Device Security 7.1.2 - Asset/Software Inventory - Software and Applications Inventory,Everest Automated - ES 7.1.2,End User Device Security,User device management,AWS Config,Are all installed software platforms and applications on scoped systems inventoried?,,ACTIVE,,"Specify if inventory of all installed softwares and applications is maintained. If yes, how often is it updated?
+
+Need full inventory showing all instances, dbs, components
+System manager or AWS Config to support maintaining inventories
+
+AWS Config Rule(s): 
+
+EC2_SECURITY_GROUP_ATTACHED_TO_ENI
+EIP_ATTACHED
+EC2_MANAGEDINSTANCE_ASSOCIATION_COMPLIANCE_STATUS_CHECK
+EC2_INSTANCE_MANAGED_BY_SSM
+
+Learn more at:  https://docs.aws.amazon.com/config/latest/developerguide/managed-rules-by-aws-config.html
+",,AUTOMATED,"{
+    ""events"": [
+        {
+            ""eventSelector"": ""EC2_SECURITY_GROUP_ATTACHED_TO_ENI"",
+            ""eventSourceName"": ""CloudTrail-Config""
+        },
+        {
+            ""eventSelector"": ""EIP_ATTACHED"",
+            ""eventSourceName"": ""CloudTrail-Config""
+        },
+        {
+            ""eventSelector"": ""EC2_MANAGEDINSTANCE_ASSOCIATION_COMPLIANCE_STATUS_CHECK"",
+            ""eventSourceName"": ""CloudTrail-Config""
+        },
+        {
+            ""eventSelector"": ""EC2_INSTANCE_MANAGED_BY_SSM"",
+            ""eventSourceName"": ""CloudTrail-Config""
+        }
+    ]
+}",Third Party Software Risk Automated Assessment Template,Third Party Software Risk Automated Assessment,Third Party Software Risk Assessment is used for gathering information required to assess risks and threats in a third party softwares. This template is a subset of the Third Party Software Risk Assessment Template. This is used to gather evidence automatically from your AWS accounts that are used for hosting your SaaS solutions.,,,ACTIVE,buyer.svg,AWS Custom Risk Asssessment,AWS,https://aws.amazon.com/marketplace/
+End User Device Security 7.2.1 - Asset Security - Security Patches,Everest Automated - ES 7.2.1,End User Device Security,User device management,AWS Config,Are all available high-risk security patches applied and verified at least monthly on all end user devices?,,ACTIVE,,"Specify if all high risk security patches are applied at least monthly. If no, how often is it applied? Can you provide more details on how you manage patching?
+
+AWS Config Rule(s):
+
+EC2_MANAGEDINSTANCE_PATCH_COMPLIANCE_STATUS_CHECK
+EC2_INSTANCE_MANAGED_BY_SSM
+EC2_MANAGEDINSTANCE_ASSOCIATION_COMPLIANCE_STATUS_CHECK
+
+Learn more at: https://docs.aws.amazon.com/config/latest/developerguide/managed-rules-by-aws-config.html
+
+Review Inspector Reports
+
+Learn more at: https://docs.aws.amazon.com/cli/latest/reference/ssm/describe-instance-patch-states.html",,AUTOMATED,"{""events"": [
+{ ""eventSelector"": ""EC2_MANAGEDINSTANCE_PATCH_COMPLIANCE_STATUS_CHECK"", ""eventSourceName"": ""CloudTrail-Config"" },
+
+
+{ ""eventSelector"": ""EC2_INSTANCE_MANAGED_BY_SSM"", ""eventSourceName"": ""CloudTrail-Config"" },
+
+
+{ ""eventSelector"": ""EC2_MANAGEDINSTANCE_ASSOCIATION_COMPLIANCE_STATUS_CHECK"", ""eventSourceName"": ""CloudTrail-Config"" }
+]}",Third Party Software Risk Automated Assessment Template,Third Party Software Risk Automated Assessment,Third Party Software Risk Assessment is used for gathering information required to assess risks and threats in a third party softwares. This template is a subset of the Third Party Software Risk Assessment Template. This is used to gather evidence automatically from your AWS accounts that are used for hosting your SaaS solutions.,,,ACTIVE,buyer.svg,AWS Custom Risk Asssessment,AWS,https://aws.amazon.com/marketplace/
+Infrastructure Security 8.2.2 - Network Security - Use of Firewalls,Everest Automated - IS 8.2.2,Infrastructure Security,Governance and oversight,"API Calls, AWS Config",Are firewalls used to isolate critical and sensitive systems into network segments separate from network segments with less sensitive systems?,,ACTIVE,,"Specify if firewalls are used to isolate critical and sensitive segments from segments with less sensitive systems.
+
+Describe all VPC IDs, security groups, NACLs, routes, and endpoints
+
+List all AWS WAF that contain IP source rules
+
+AWS Config Rule(s):
+
+INCOMING_SSH_DISABLED
+RESTRICTED_INCOMING_TRAFFIC
+VPC_DEFAULT_SECURITY_GROUP_CLOSED
+VPC_SG_OPEN_ONLY_TO_AUTHORIZED_PORTS
+ALB_WAF_ENABLED
+
+ Learn more at: https://docs.aws.amazon.com/config/latest/developerguide/managed-rules-by-aws-config.html",,AUTOMATED,"{
+    ""events"": [
+        {
+            ""eventSelector"": ""ec2_CreateSecurityGroup"",
+            ""eventSourceName"": ""CloudTrail""
+        },
+        {
+            ""eventSelector"": ""ec2_CreateRoute"",
+            ""eventSourceName"": ""CloudTrail""
+        },
+        {
+            ""eventSelector"": ""ec2_CreateNetworkAcl"",
+            ""eventSourceName"": ""CloudTrail""
+        },
+       {
+            ""eventSelector"": ""INCOMING_SSH_DISABLED"",
+            ""eventSourceName"": ""CloudTrail-Config""
+        },
+       {
+            ""eventSelector"": ""RESTRICTED_INCOMING_TRAFFIC"",
+            ""eventSourceName"": ""CloudTrail-Config""
+        },
+       {
+            ""eventSelector"": ""VPC_DEFAULT_SECURITY_GROUP_CLOSED"",
+            ""eventSourceName"": ""CloudTrail-Config""
+        },
+       {    ""eventSelector"": ""VPC_SG_OPEN_ONLY_TO_AUTHORIZED_PORTS"",
+            ""eventSourceName"": ""CloudTrail-Config""
+        },
+       {
+            ""eventSelector"": ""ALB_WAF_ENABLED"",
+            ""eventSourceName"": ""CloudTrail-Config""
+        },
+ {
+            ""eventSelector"": ""ec2_DescribeVpcs"",
+            ""eventSourceName"": ""S2S"",
+            ""eventInputConfig"": {
+                ""Action"": ""describeVpcs"",
+                 ""Service"": ""ec2"" 
+              }
+        },
+        {
+            ""eventSelector"": ""ec2_DescribeSecurityGroups"",
+            ""eventSourceName"": ""S2S"",
+            ""eventInputConfig"": {
+                ""Action"": ""describeSecurityGroups"",
+                 ""Service"": ""ec2"" 
+              }
+        },
+        {
+            ""eventSelector"": ""ec2_DescribeNetworkAcls"",
+            ""eventSourceName"": ""S2S"",
+            ""eventInputConfig"": {
+                ""Action"": ""describeNetworkAcls"",
+                 ""Service"": ""ec2"" 
+              }
+        },
+        {
+            ""eventSelector"": ""ec2_DescribeRouteTables"",
+            ""eventSourceName"": ""S2S"",
+            ""eventInputConfig"": {
+                ""Action"": ""describeRouteTables"",
+                 ""Service"": ""ec2"" 
+              }
+        }
+    ]
+}",Third Party Software Risk Automated Assessment Template,Third Party Software Risk Automated Assessment,Third Party Software Risk Assessment is used for gathering information required to assess risks and threats in a third party softwares. This template is a subset of the Third Party Software Risk Assessment Template. This is used to gather evidence automatically from your AWS accounts that are used for hosting your SaaS solutions.,,,ACTIVE,buyer.svg,AWS Custom Risk Asssessment,AWS,https://aws.amazon.com/marketplace/
+Infrastructure Security 8.2.4 - Network Security - Intrusion Detection/Prevention Systems,Everest Automated - IS 8.2.4,Infrastructure Security,Governance and oversight,AWS Config,Are intrusion detection and prevention systems deployed in all sensitive network zones and wherever firewalls are enabled?,,ACTIVE,,"Specify if intrusion detection and prevention systems are enabled in all sensitive network zones.
+
+AWS Config Rule(s): 
+
+GUARDDUTY_ENABLED_CENTRALIZED
+
+Learn more at: https://docs.aws.amazon.com/config/latest/developerguide/managed-rules-by-aws-config.html
+
+",,AUTOMATED,"{
+    ""events"": [
+
+{ ""eventSelector"": ""GUARDDUTY_ENABLED_CENTRALIZED"", ""eventSourceName"": ""CloudTrail-Config"" }
+
+
+
+
+    ]
+}",Third Party Software Risk Automated Assessment Template,Third Party Software Risk Automated Assessment,Third Party Software Risk Assessment is used for gathering information required to assess risks and threats in a third party softwares. This template is a subset of the Third Party Software Risk Assessment Template. This is used to gather evidence automatically from your AWS accounts that are used for hosting your SaaS solutions.,,,ACTIVE,buyer.svg,AWS Custom Risk Asssessment,AWS,https://aws.amazon.com/marketplace/
