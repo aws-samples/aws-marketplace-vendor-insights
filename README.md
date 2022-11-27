@@ -2,7 +2,7 @@
 
 # Vendor Assessment Setup
 
-Vendor Insights lets AWS Marketplace sellers offer buyers on-demand access to security and compliance information for their SaaS solutions. This information is shared through a dashboard comprised of 140 security controls. Each control is evaluated based on a combination of four evidence sources.
+Vendor Insights lets AWS Marketplace sellers offer buyers on-demand access to security and compliance information for their SaaS solutions. This information is shared through a dashboard comprised of 125 security controls. Each control is evaluated based on a combination of four evidence sources.
 
 The first source is evidence automatically gathered by AWS audit manager and Config. The second and third are SOC2 and ISO audit reports which can be shared directly with Vendor Insights. The fourth is a self assessment that can be as short as 29 questions if we choose to enable the other evidence sources.
 
@@ -12,7 +12,7 @@ The onboarding process deploys the services necessary to collect this evidence a
 Please refer to https://aws-vendor-insights.s3.amazonaws.com/vendor-onboarding-templates/v0/VendorInsightsOnboardingCFT.yaml for key onboarding steps. Onboarding steps (including prerequisites) include below.
 
 * [AWS Audit Manager](https://docs.aws.amazon.com/audit-manager/latest/userguide/what-is.html):
-    * The StackSet will create 2 Audit Manager assessments in AWS Audit Manager - a Self Assessment containing 140 controls and an Automated Assessment containing 30 controls. You can provide a buyer facing answer for each control in the Self Assessment while the Automated Assessment is automatically populated using AWS Config.
+    * The StackSet will create 2 Audit Manager assessments in AWS Audit Manager - a Self Assessment containing 125 controls and an Automated Assessment containing 30 controls. You can provide a buyer facing answer for each control in the Self Assessment while the Automated Assessment is automatically populated using AWS Config.
 * [AWS Config](https://aws.amazon.com/config/): 
     * The StackSet will deploy an AWS Config [Conformance Pack](https://docs.aws.amazon.com/config/latest/developerguide/conformance-packs.html) to set up the requisite AWS Config rules that will allow the AWS Audit Manager automated assessment to gather live evidences for other AWS services deployed in that AWS account.
 * [AWS S3](https://aws.amazon.com/s3/):
