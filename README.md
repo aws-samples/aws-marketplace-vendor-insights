@@ -9,7 +9,7 @@ The first source is evidence automatically gathered by AWS audit manager and Con
 The onboarding process deploys the services necessary to collect this evidence and build the assessment report that feeds the vendor insights profile. Onboarding is achieved using AWS CloudFormation Stacks and StackSets . We first deploy a prerequisite stack that creates the IAM roles and permissions needed to operate CloudFormation StackSets. Then we use StackSets or CloudFormation Stacks to deploy into the production accounts to allow vendor insights to gather evidence
 
 
-Please refer to https://aws-vendor-insights.s3.amazonaws.com/vendor-onboarding-templates/v0/VendorInsightsOnboardingCFT.yaml for key onboarding steps. Onboarding steps (including prerequisites) include below.
+Please refer to the [Setting up as a seller guide](https://docs.aws.amazon.com/marketplace/latest/userguide/vendor-insights-setting-up.html) for key onboarding steps. Onboarding steps (including prerequisites) include below.
 
 * [AWS Audit Manager](https://docs.aws.amazon.com/audit-manager/latest/userguide/what-is.html):
     * The StackSet will create 2 Audit Manager assessments in AWS Audit Manager - a Self Assessment containing 125 controls and an Automated Assessment containing 30 controls. You can provide a buyer facing answer for each control in the Self Assessment while the Automated Assessment is automatically populated using AWS Config.
@@ -35,8 +35,8 @@ There are 2 CFT files that you will be running as part of the Vendor Insights se
 
 * *VendorInsightsPrerequisiteCFT.yaml* sets up the necessary admin role and execution permissions that are needed to run StackSets in your account. 
 * *VendorInsightsOnboardingCFT.yaml* is responsible for setting up the above mentioned AWS services and configuring the appropriate IAM permissions that will allow Vendor Insights service to gather data for the SaaS product running in your AWS account and display those on your Vendor Insights profile. These location for these files are as follows:
-    * [https://aws-vendor-insights.s3.amazonaws.com/vendor-onboarding-templates/v0/*VendorInsightsPrerequisiteCFT.yaml*](https://aws-vendor-insights.s3.amazonaws.com/vendor-onboarding-templates/v0/SellerOnboardingCFTPrerequisite.yml)
-    * [https://aws-vendor-insights.s3.amazonaws.com/vendor-onboarding-templates/v0/*VendorInsightsOnboardingCFT.yaml*](https://aws-vendor-insights.s3.amazonaws.com/vendor-onboarding-templates/v0/VendorInsightsLaunchPadV4.yml)
+    * [Vender Insights prerequisite template](https://aws-vendor-insights.s3.amazonaws.com/vendor-onboarding-templates/v0/VendorInsightsPrerequisiteCFT.yaml)
+    * [Vendor Insights Onboarding template](https://aws-vendor-insights.s3.amazonaws.com/vendor-onboarding-templates/v0/VendorInsightsOnboardingCFT.yaml)
 
 ### **Step 1: Execute *VendorInsightsPrerequisiteCFT.yaml* to setup IAM permissions for the StackSet run:**
 
@@ -96,7 +96,7 @@ Once the execution of the *VendorInsightsOnboardingCFT.yaml* StackSet is complet
 
 ## **Contact us**
 
-For any question or issues you may face when executing these steps, please reach out to us at [vendor-insights-support@amazon.com](mailto:vendor-insights-support@amazon.com).
+For any question or issues you may face when executing these steps, please visit the [AWS Marketplace seller support page](http://aws.amazon.com/marketplace/management/contact-us/?category=listing&details=Hello%20AWS%20Marketplace%20Operations%20Team%2C%0A%0AI%20want%20to%20add%20security%20profile%20for%20product%20id%3A%20%3CProductId%3E%0A%0AThanks&marketplace=commercial&subCategory=update).
 
 ## Appendix
 
