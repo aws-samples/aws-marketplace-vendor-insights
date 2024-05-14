@@ -35,8 +35,8 @@ There are 2 CFT files that you will be running as part of the Vendor Insights se
 
 * *VendorInsightsPrerequisiteCFT.yaml* sets up the necessary admin role and execution permissions that are needed to run StackSets in your account. 
 * *VendorInsightsOnboardingCFT.yaml* is responsible for setting up the above mentioned AWS services and configuring the appropriate IAM permissions that will allow Vendor Insights service to gather data for the SaaS product running in your AWS account and display those on your Vendor Insights profile. These location for these files are as follows:
-    * [Vender Insights prerequisite template](https://aws-vendor-insights.s3.amazonaws.com/vendor-onboarding-templates/v0/VendorInsightsPrerequisiteCFT.yaml)
-    * [Vendor Insights Onboarding template](https://aws-vendor-insights.s3.amazonaws.com/vendor-onboarding-templates/v0/VendorInsightsOnboardingCFT.yaml)
+    * [Vender Insights prerequisite template](https://d2jixhtb1m9n7r.cloudfront.net/vendor-onboarding-templates/v0/VendorInsightsPrerequisiteCFT.yaml)
+    * [Vendor Insights Onboarding template](https://d2jixhtb1m9n7r.cloudfront.net/vendor-onboarding-templates/v0/VendorInsightsOnboardingCFT.yaml)
 
 ### **Step 1: Execute *VendorInsightsPrerequisiteCFT.yaml* to setup IAM permissions for the StackSet run:**
 
