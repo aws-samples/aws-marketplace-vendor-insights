@@ -31,27 +31,6 @@ Parameters:
     AllowedValues:
       - "Yes"
       - "No"
-  CreateVendorInsightsBucket:
-    Type: String
-    Default: "Yes"
-    Description: Do you want to create the Vendor Insights Artifacts S3 Bucket(vendor-insights-artifacts-bucket-{YourAccountID}) and its related bucket policy? If it already exists, please Select 'No'
-    AllowedValues:
-      - "Yes"
-      - "No"
-  CreateVendorInsightsSelfAssessment:
-    Type: String
-    Default: "Yes"
-    Description: Do you want to create the Vendor Insights self assessment framework in the primary region with this deployment?
-    AllowedValues:
-      - "Yes"
-      - "No"
-  ProductName:
-    Type: String
-    Default: ""
-    AllowedPattern: '^[a-zA-Z0-9]*$'
-    ConstraintDescription: ProductName must either consists of only letters and numbers or be left empty.
-    MaxLength: 128
-    Description: Provide the name of the product for which you are creating the security profile. This name shall be added as a suffix to your self-assessment.
   CreateVendorInsightsAutomatedAssessment:
     Type: String
     Default: "Yes"
@@ -83,14 +62,12 @@ Resources:
     Condition: CurrentRegionEqualsPrimaryRegion
     Properties:
       Parameters:
-        CreateAuditReportsBucket: !Ref CreateVendorInsightsBucket
-        VendorInsightsBucketName: !Join ["-", ["vendor-insights-audit-reports-bucket", !Ref AWS::AccountId]]
         AssessmentReportsBucketName: !Join ["-", ["vendor-insights-assessment-reports-bucket", !Ref AWS::AccountId]]
         StackSetOutputsBucketName: !Join ["-", ["vendor-insights-stack-set-output-bucket", !Ref AWS::AccountId]]
       Tags:
         - Key: "AssociatedWith"
           Value: "AWSVendorInsights"
-      TemplateURL: https://aws-vendor-insights.s3.amazonaws.com/vendor-onboarding-templates/v0/VendorInsightsS3.yaml
+      TemplateURL: https://aws-vendor-insights.s3.us-west-2.amazonaws.com/vendor-onboarding-templates/v0/VendorInsightsS3.yaml
       TimeoutInMinutes: 20
   VendorInsightsIAMRolesStack:
     Type: AWS::CloudFormation::Stack
@@ -98,14 +75,13 @@ Resources:
     Properties:
       Parameters:
         MarketplaceManagementAccountId: !Ref MarketplaceManagementAccountId
-        CreateAuditReportsBucket: !Ref CreateVendorInsightsBucket
         StackSetOutputsBucketName: !GetAtt
           - VendorInsightsS3BucketsStack
           - Outputs.StackSetsOutputBucket
       Tags:
         - Key: "AssociatedWith"
           Value: "AWSVendorInsights"
-      TemplateURL: https://aws-vendor-insights.s3.amazonaws.com/vendor-onboarding-templates/v0/VendorInsightsIAM.yaml
+      TemplateURL: https://aws-vendor-insights.s3.us-west-2.amazonaws.com/vendor-onboarding-templates/v0/VendorInsightsIAM.yaml
       TimeoutInMinutes: 20
   VendorInsightsEnableAWSConfig:
     Type: AWS::CloudFormation::Stack
@@ -117,7 +93,7 @@ Resources:
       Tags:
         - Key: "AssociatedWith"
           Value: "AWSVendorInsights"
-      TemplateURL: https://aws-vendor-insights.s3.amazonaws.com/vendor-onboarding-templates/v0/CheckAWSConfig.yaml
+      TemplateURL: https://aws-vendor-insights.s3.us-west-2.amazonaws.com/vendor-onboarding-templates/v0/CheckAWSConfig.yaml
       TimeoutInMinutes: 20
   VendorInsightsCreateConformancePack:
     Type: AWS::CloudFormation::Stack
@@ -128,7 +104,7 @@ Resources:
       Tags:
         - Key: "AssociatedWith"
           Value: "AWSVendorInsights"
-      TemplateURL: https://aws-vendor-insights.s3.amazonaws.com/vendor-onboarding-templates/v0/VendorInsightsConformancePack.yaml
+      TemplateURL: https://aws-vendor-insights.s3.us-west-2.amazonaws.com/vendor-onboarding-templates/v0/VendorInsightsConformancePack.yaml
       TimeoutInMinutes: 20
   VendorInsightsLaunchpadFunction:
     Type: AWS::Lambda::Function
@@ -138,327 +114,219 @@ Resources:
           PrimaryRegion: !Ref PrimaryRegion
           AssessmentReportsBucketName: !Join ["-", ["vendor-insights-assessment-reports-bucket", !Ref AWS::AccountId]]
           StackSetOutputsBucketName:  !Join ["-", ["vendor-insights-stack-set-output-bucket", !Ref AWS::AccountId]]
-          CreateVendorInsightsSelfAssessment: !Ref CreateVendorInsightsSelfAssessment
-          VendorInsightsSelfAssessmentID: !Ref ProductName
-          CreateVendorInsightsBucket: !Ref CreateVendorInsightsBucket
           CreateVendorInsightsIAMRoles: !Ref CreateVendorInsightsIAMRoles
           CreateVendorInsightsAutomatedAssessment: !Ref CreateVendorInsightsAutomatedAssessment
           SecurityFrameworkVersion: !Ref SecurityFrameworkVersion
           AccountID: !Ref AWS::AccountId
           MarketplaceManagementAccountId: !Ref MarketplaceManagementAccountId
-          AuditReportsBucketName: !Join ["-", ["vendor-insights-audit-reports-bucket", !Ref AWS::AccountId]]
       Handler: index.lambda_handler
       Timeout: 900
       MemorySize: 2048
       Role: !GetAtt 'VendorInsightsLaunchpadLambdaExecutionRole.Arn'
-      Runtime: python3.9
+      Runtime: python3.10
       Code:
         ZipFile: |
           # Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
           # SPDX-License-Identifier: Apache-2.0
-
+          
           """
-          Purpose
-          Vendor Insights Onboarding Custom Resource
+          Purpose:
+          AWS Vendor Insights Onboarding Custom Resource
           """
-
-          import base64
-          import logging
-          import boto3
-          import csv
+          
           import collections
-          from botocore.exceptions import ClientError
-          import io
-          import json
-          import cfnresponse
-          import os
-          import uuid
+          import csv
           import datetime
+          import json
+          import logging
+          import os
           import time
-
+          import uuid
+          
+          import boto3
+          import cfnresponse
+          from botocore.exceptions import ClientError
+          
           VENDOR_INSIGHTS_ASSET_BUCKET_NAME = "aws-vendor-insights"
-          VENDOR_INSIGHTS_SELF_ASSESSMENT_TEMPLATE_KEY_V1 = "vendor-onboarding-templates/v0/frameworks/SelfAssessmentFrameworkV1.csv"
-          VENDOR_INSIGHTS_AUTOMATED_ASSESSMENT_TEMPLATE_KEY_V1 = "vendor-onboarding-templates/v0/frameworks/AutomatedAssessmentFrameworkV1.csv"
-          VENDOR_INSIGHTS_SELF_ASSESSMENT_TEMPLATE_KEY_V2 = "vendor-onboarding-templates/v0/frameworks/SelfAssessmentFrameworkV2.csv"
-          VENDOR_INSIGHTS_AUTOMATED_ASSESSMENT_TEMPLATE_KEY_V2 = "vendor-onboarding-templates/v0/frameworks/AutomatedAssessmentFrameworkV2.csv"
-          VENDOR_INSIGHTS_SELF_ASSESSMENT_FW_NAME_V1 = "AWSVendorInsightsSelfAssessmentFramework"
-          VENDOR_INSIGHTS_SELF_ASSESSMENT_FW_NAME_V2 = "AWSVendorInsightsSelfAssessmentFrameworkV2"
-          VENDOR_INSIGHTS_SELF_ASSESSMENT_NAME_V1 = "AWSVendorInsightsSelfAssessment"
-          VENDOR_INSIGHTS_SELF_ASSESSMENT_NAME_V2 = "AWSVendorInsightsSelfAssessmentV2"
-          VENDOR_INSIGHTS_SELF_ASSESSMENT_BASENAME = "AWSVendorInsightsSelfAssessment"
+          VENDOR_INSIGHTS_AUTOMATED_ASSESSMENT_TEMPLATE_KEY_V1 = "vendor-onboarding-templates/v0/frameworks" \
+                                                                 "/AutomatedAssessmentFrameworkV1.csv"
+          VENDOR_INSIGHTS_AUTOMATED_ASSESSMENT_TEMPLATE_KEY_V2 = "vendor-onboarding-templates/v0/frameworks" \
+                                                                 "/AutomatedAssessmentFrameworkV2.csv"
           VENDOR_INSIGHTS_AUTOMATED_ASSESSMENT_FW_NAME_V1 = "AWSVendorInsightsAutomatedAssessmentFramework"
           VENDOR_INSIGHTS_AUTOMATED_ASSESSMENT_FW_NAME_V2 = "AWSVendorInsightsAutomatedAssessmentFrameworkV2"
           VENDOR_INSIGHTS_AUTOMATED_ASSESSMENT_NAME_V1 = "AWSVendorInsightsAutomatedAssessment"
           VENDOR_INSIGHTS_AUTOMATED_ASSESSMENT_NAME_V2 = "AWSVendorInsightsAutomatedAssessmentV2"
-          VENDOR_INSIGHTS_VIEW_ASSESSMENTS_ROLENAME = "AWSAuditManagerAdminRole"
-          VENDOR_INSIGHTS_ROLENAME = "AWSVendorInsightsRole"
-          VENDOR_INSIGHTS_PASS_ROLENAME = "AWSVendorInsightsCrossAccountAccessPassRole"
-
-          framework_to_assessment_map = {
-            VENDOR_INSIGHTS_SELF_ASSESSMENT_FW_NAME_V1: VENDOR_INSIGHTS_SELF_ASSESSMENT_NAME_V1,
-            VENDOR_INSIGHTS_SELF_ASSESSMENT_FW_NAME_V2: VENDOR_INSIGHTS_SELF_ASSESSMENT_NAME_V2,
-            VENDOR_INSIGHTS_AUTOMATED_ASSESSMENT_FW_NAME_V1: VENDOR_INSIGHTS_AUTOMATED_ASSESSMENT_NAME_V1,
-            VENDOR_INSIGHTS_AUTOMATED_ASSESSMENT_FW_NAME_V2: VENDOR_INSIGHTS_AUTOMATED_ASSESSMENT_NAME_V2
+          VENDOR_INSIGHTS_VIEW_ASSESSMENTS_ROLE_NAME = "AWSAuditManagerAdminRole"
+          VENDOR_INSIGHTS_ROLE_NAME = "AWSVendorInsightsRole"
+          VENDOR_INSIGHTS_PASS_ROLE_NAME = "AWSVendorInsightsCrossAccountAccessPassRole"
+          FRAMEWORK_NAME_TO_ASSESSMENT_NAME_MAP = {
+              VENDOR_INSIGHTS_AUTOMATED_ASSESSMENT_FW_NAME_V1: VENDOR_INSIGHTS_AUTOMATED_ASSESSMENT_NAME_V1,
+              VENDOR_INSIGHTS_AUTOMATED_ASSESSMENT_FW_NAME_V2: VENDOR_INSIGHTS_AUTOMATED_ASSESSMENT_NAME_V2
           }
-
+          
           logger = logging.getLogger(__name__)
           logger.setLevel(logging.INFO)
-
+          
+          
           def get_role_arn_for_name(role_name):
               """
               Construct the role ARN for given role name
-
+          
               Parameters:
                 - role_name: Name of the role
-
+          
               Returns:
                 - ARN of the given role
               """
               acc_id = os.environ['AccountID']
               return "arn:aws:iam::{0}:role/{1}".format(acc_id, role_name)
-
-          def get_existing_controls(auditmanager_client):
+          
+          
+          def get_existing_controls(audit_manager_client):
               """
               Returns a mapping of existing custom control names to their id.
-
+          
               Parameters:
-                - auditmanager_client : A boto3 Audit Manager client for the current region
-
+                - audit_manager_client : A boto3 Audit Manager client for the current region
+          
               Returns:
-                - control_namesto_id_mapping : Control name to id mapping (dictionary)
+                - control_names_to_id_mapping : Control name to id mapping (dictionary)
               """
               try:
-                  existing_controls = auditmanager_client.list_controls(controlType = 'Custom')
+                  existing_controls = audit_manager_client.list_controls(controlType='Custom')
                   existing_controls_count = len(existing_controls['controlMetadataList'])
                   if existing_controls_count == 0:
                       logger.info("Did not find any existing controls, will create new controls")
                       return {}
-                  control_namesto_id_mapping = { val['name']: val['id'] for idx, val in enumerate(existing_controls['controlMetadataList'])}
-
+                  control_names_to_id_mapping = {val['name']: val['id'] for idx, val in
+                                                 enumerate(existing_controls['controlMetadataList'])}
+          
                   next_token = None
-
+          
                   if 'nextToken' in existing_controls:
                       next_token = existing_controls['nextToken']
-
-                  while next_token != None:
+          
+                  while next_token is not None:
                       next_token = existing_controls['nextToken']
-                      existing_controls = auditmanager_client.list_controls(controlType = 'Custom', nextToken = next_token)
-                      paginated = { val['name']: val['id'] for idx, val in enumerate(existing_controls['controlMetadataList'])}
-                      control_namesto_id_mapping = {**control_namesto_id_mapping, **paginated}
+                      existing_controls = audit_manager_client.list_controls(controlType='Custom', nextToken=next_token)
+                      paginated = {val['name']: val['id'] for idx, val in enumerate(existing_controls['controlMetadataList'])}
+                      control_names_to_id_mapping = {**control_names_to_id_mapping, **paginated}
                       if 'nextToken' not in existing_controls:
                           break
-                  return control_namesto_id_mapping
+                  return control_names_to_id_mapping
               except Exception as e:
-                  logger.exception("Received Exception while trying to retreive existing controls")
+                  logger.exception("Received Exception while trying to retrieve existing controls")
                   logger.exception(str(e))
                   raise
-
-          def get_existing_assessment_frameworks(auditmanager_client):
+          
+          
+          def get_existing_assessment_frameworks(audit_manager_client):
               """
               Returns a mapping of existing custom assessment framework names to their id.
-
+          
               Parameters:
-                - auditmanager_client : A boto3 Audit Manager client for the current region
-
+                - audit_manager_client : A boto3 Audit Manager client for the current region
+          
               Returns:
-                - framework_namesto_id_mapping : Custom Framework name to id mapping (dictionary)
+                - framework_names_to_id_mapping : Custom Framework name to id mapping (dictionary)
               """
               try:
-                  existing_frameworks = auditmanager_client.list_assessment_frameworks(frameworkType = 'Custom')
+                  existing_frameworks = audit_manager_client.list_assessment_frameworks(frameworkType='Custom')
                   existing_frameworks_count = len(existing_frameworks['frameworkMetadataList'])
                   if existing_frameworks_count == 0:
                       logger.info("Could not find existing custom framework names, will create new ones")
                       return {}
-                  framework_namesto_id_mapping = { val['name']: val['id'] for idx, val in enumerate(existing_frameworks['frameworkMetadataList'])}
-
+                  framework_names_to_id_mapping = {val['name']: val['id'] for idx, val in
+                                                   enumerate(existing_frameworks['frameworkMetadataList'])}
+          
                   next_token = None
-
+          
                   if 'nextToken' in existing_frameworks:
                       next_token = existing_frameworks['nextToken']
-
-                  while next_token != None:
+          
+                  while next_token is not None:
                       next_token = existing_frameworks['nextToken']
-                      existing_frameworks = auditmanager_client.list_assessment_frameworks(frameworkType = 'Custom', nextToken = next_token)
-                      paginated = { val['name']: val['id'] for idx, val in enumerate(existing_frameworks['frameworkMetadataList'])}
-                      framework_namesto_id_mapping = {**framework_namesto_id_mapping, **paginated}
+                      existing_frameworks = audit_manager_client.list_assessment_frameworks(frameworkType='Custom',
+                                                                                            nextToken=next_token)
+                      paginated = {val['name']: val['id'] for idx, val in enumerate(existing_frameworks['frameworkMetadataList'])}
+                      framework_names_to_id_mapping = {**framework_names_to_id_mapping, **paginated}
                       if 'nextToken' not in existing_frameworks:
                           break
-                  return framework_namesto_id_mapping
+                  return framework_names_to_id_mapping
               except Exception as e:
-                  logger.info("Received Exception when trying to retreive existing custom frameworks...")
+                  logger.info("Received Exception when trying to retrieve existing custom frameworks...")
                   logger.exception(str(e))
                   raise
-
-          def create_custom_controls_self_assessment(rows_grouped_by_control_set, client):
-              """
-              Create custom controls from control set grouped controls
-
-              Parameters:
-                - rows_grouped_by_control_set : dictionary containing framework control sets information
-                - client : boto3 AWS Audit Manager client
-
-              Returns:
-                - am_controls_grouped_by_control_set : list of control set ids
-              """
-              try:
-                  control_sets = rows_grouped_by_control_set.keys()
-                  am_controls_grouped_by_control_set = collections.defaultdict(list)
-
-                  control_namesto_id_mapping = get_existing_controls(client)
-
-                  for control_set in control_sets:
-                      am_controls = []
-                      logger.info('Creating custom controls in Audit Manager for control set ' + control_set)
-                      for control_row in rows_grouped_by_control_set[control_set]:
-                          if control_row['ControlTitle'] in control_namesto_id_mapping.keys():
-                              title = control_row['ControlTitle']
-                              logger.info("Control {0} Exists! Will delete and recreate new..".format(title))
-                              client.delete_control(controlId=control_namesto_id_mapping[title])
-                      # Wait for 5 seconds for controls to be deleted
-                      time.sleep(5)
-                      for control_row in rows_grouped_by_control_set[control_set]:
-                          ct_description = control_row["ControlDescription"]
-                          evidence_extraction_detail = control_row["EvidenceExtractionDetail"]
-                          ct_testing_information = ""
-                          separator = " "
-                          evidence_extraction_detail = evidence_extraction_detail.splitlines()
-                          for word in evidence_extraction_detail:
-                              ct_testing_information = ct_testing_information + word + separator
-                          ct_testing_information = ct_testing_information[0:1000]
-
-                          logger.info("Creating control with title={0},desc={1},testingInformation={2}".format(control_row['ControlTitle'],ct_description,ct_testing_information))
-                          custom_control = client.create_control(name= control_row['ControlTitle'],
-                                                  description = ct_description,
-                                                  testingInformation = ct_testing_information,
-                                                  controlMappingSources=[{'sourceName': 'Manual',
-                                                                          'sourceSetUpOption': 'Procedural_Controls_Mapping', #Use System_Controls_Mapping for automated
-                                                                          'sourceType': 'MANUAL',}]).get('control')
-                          am_controls.append({'id': custom_control.get('id')})
-                      am_controls_grouped_by_control_set[control_set] = am_controls
-                  return am_controls_grouped_by_control_set
-              except ClientError:
-                  logger.exception("Couldn't create custom controls")
-                  raise
-
+          
+          
           def get_framework_content(s3_resource, framework_name):
               """
               Get contents for Audit Manager custom framework
-
+          
               Parameters:
                 - s3_resource: S3 bucket that contains data for the framework
                 - framework_name: AWS Audit Manager framework name
-
+          
               Returns:
                 - s3_resource.Object: S3 object
               """
-              if framework_name == VENDOR_INSIGHTS_SELF_ASSESSMENT_FW_NAME_V1:
-                  return s3_resource.Object(VENDOR_INSIGHTS_ASSET_BUCKET_NAME, VENDOR_INSIGHTS_SELF_ASSESSMENT_TEMPLATE_KEY_V1)
-              elif framework_name == VENDOR_INSIGHTS_SELF_ASSESSMENT_FW_NAME_V2:
-                  return s3_resource.Object(VENDOR_INSIGHTS_ASSET_BUCKET_NAME, VENDOR_INSIGHTS_SELF_ASSESSMENT_TEMPLATE_KEY_V2)
-              elif framework_name == VENDOR_INSIGHTS_AUTOMATED_ASSESSMENT_FW_NAME_V1:
-                  return s3_resource.Object(VENDOR_INSIGHTS_ASSET_BUCKET_NAME, VENDOR_INSIGHTS_AUTOMATED_ASSESSMENT_TEMPLATE_KEY_V1)
+              if framework_name == VENDOR_INSIGHTS_AUTOMATED_ASSESSMENT_FW_NAME_V1:
+                  return s3_resource.Object(VENDOR_INSIGHTS_ASSET_BUCKET_NAME,
+                                            VENDOR_INSIGHTS_AUTOMATED_ASSESSMENT_TEMPLATE_KEY_V1)
               else:
-                  return s3_resource.Object(VENDOR_INSIGHTS_ASSET_BUCKET_NAME, VENDOR_INSIGHTS_AUTOMATED_ASSESSMENT_TEMPLATE_KEY_V2)
-
-          def create_self_assessment_custom_framework(framework_name):
-              """
-              Create custom framework from a CSV file
-
-              Parameters:
-                - framework_name : string with the name of the custom framework to be created
-
-              Returns:
-                - None
-              """
-
-              auditmanager_client = boto3.client('auditmanager')
-
-              frameworks_to_id_mapping = get_existing_assessment_frameworks(auditmanager_client)
-
-              if framework_name in frameworks_to_id_mapping:
-                  logger.info("{0} is an existing self-assessment framework!. Skipping creation of assessment framework".format(framework_name))
-                  logger.info(frameworks_to_id_mapping)
-                  return
-
-              rows_grouped_by_control_set = collections.defaultdict(list)
-
-              # Read Manual Assessment Framework CSV object from URL
-              try:
-
-                  s3_resource = boto3.resource('s3')
-                  s3_object = get_framework_content(s3_resource, framework_name)
-                  csvfile = s3_object.get()['Body'].read().decode('utf-8').splitlines()
-                  reader = csv.DictReader(csvfile)
-                  for row in reader:
-                      row["ControlTitle"] = row["ControlTitle"]  + "(Vendor Insights Self Assessment)"
-                      rows_grouped_by_control_set[row['ControlSet']].append(row)
-              except Exception as e:
-                  logger.info("Could not retrieve self assessment framework template from the mentioned location")
-                  logger.exception(str(e))
-                  raise
-
-              am_controls_grouped_by_control_set = create_custom_controls_self_assessment(rows_grouped_by_control_set, auditmanager_client)
-              time.sleep(2)
-              control_sets = []
-              for control_set in am_controls_grouped_by_control_set.keys():
-                  if len(am_controls_grouped_by_control_set.get(control_set)) == 0:
-                      continue
-                  logger.info(">>" + str(am_controls_grouped_by_control_set.get(control_set)))
-                  control_sets.append(
-                      {
-                      'name': control_set,
-                      'controls': am_controls_grouped_by_control_set.get(control_set)
-                      })
-              if len(control_sets) > 0:
-                  try:
-                      custom_framework = auditmanager_client.create_assessment_framework(name=framework_name,controlSets= control_sets)
-                      print('Successfully created custom framework: ', custom_framework.get('framework').get('name'), ' : ',
-                                custom_framework.get('framework').get('id'))
-                      logger.info('-' * 88)
-                  except Exception as e:
-                      logger.exception("Could not create custom assessment framework : {0}".format(framework_name))
-                      logger.exception(str(e))
-                      raise
-
+                  return s3_resource.Object(VENDOR_INSIGHTS_ASSET_BUCKET_NAME,
+                                            VENDOR_INSIGHTS_AUTOMATED_ASSESSMENT_TEMPLATE_KEY_V2)
+          
+          
           # Automated controls
-          def create_custom_controls_automated_framework(rows_grouped_by_control_set, auditmanager_client):
+          def create_custom_controls_automated_framework(rows_grouped_by_control_set, audit_manager_client):
               """
               Create custom controls from control set grouped controls
-
+          
               Parameters:
                 - rows_grouped_by_control_set : dictionary containing framework control set mappings
-                - auditmanager_client : boto3 AWS Audit Manager client
-
+                - audit_manager_client : boto3 AWS Audit Manager client
+          
               Returns:
                 - am_controls_grouped_by_control_set: list of custom control Ids
               """
-
-              control_namesto_id_mapping = get_existing_controls(auditmanager_client)
-
-
+          
+              control_names_to_id_mapping = get_existing_controls(audit_manager_client)
+          
               source_name_mapping = {'CloudTrail': 'AWS_Cloudtrail',
-                                    'CloudTrail-Config' : 'AWS_Config',
-                                    'S2S' : 'AWS_API_Call',
-                                    'SecurityHub' : 'AWS_Security_Hub'}
+                                     'CloudTrail-Config': 'AWS_Config',
+                                     'S2S': 'AWS_API_Call',
+                                     'SecurityHub': 'AWS_Security_Hub'}
               # https://docs.aws.amazon.com/audit-manager/latest/APIReference/API_CreateControlMappingSource.html#auditmanager-Type-CreateControlMappingSource-sourceType
-
+          
               try:
                   control_sets = rows_grouped_by_control_set.keys()
                   am_controls_grouped_by_control_set = collections.defaultdict(list)
                   for control_set in control_sets:
                       am_controls = []
+                      control_names_of_already_existing_controls = []
+          
                       logger.info('Creating custom controls in Audit Manager for control set ' + control_set)
+          
                       data_source_name_prefix = 'Data source '
                       for control_row in rows_grouped_by_control_set[control_set]:
-                          if control_row['ControlTitle'] in control_namesto_id_mapping.keys():
+                          if control_row['ControlTitle'] in control_names_to_id_mapping.keys():
                               title = control_row['ControlTitle']
-                              logger.info("Control {0} Exists! Will delete old and recreate new..".format(title))
-                              auditmanager_client.delete_control(controlId=control_namesto_id_mapping[title])
-                      # Wait for 5 seconds for control deletion to continue
-                      time.sleep(5)
+                              logger.info("Control {0} Exists! Will reuse the existing control...".format(title))
+                              control_names_of_already_existing_controls.append(title)
+          
                       for control_row in rows_grouped_by_control_set[control_set]:
                           logger.info("Creating control with title " + control_row['ControlTitle'])
-
+          
+                          # If control already exists, skip creation
+                          if control_row['ControlTitle'] in control_names_of_already_existing_controls:
+                              existing_control_name = control_row['ControlTitle']
+                              existing_control_id = control_names_to_id_mapping[existing_control_name]
+                              am_controls.append({'id': existing_control_id})
+          
+                              continue
+          
+                          # The control does not exist - so will create it!
                           ct_description = control_row["ControlDescription"]
                           evidence_extraction_detail = control_row["EvidenceExtractionDetail"]
                           ct_testing_information = ""
@@ -467,23 +335,23 @@ Resources:
                           for word in evidence_extraction_detail:
                               ct_testing_information = ct_testing_information + word + separator
                           ct_testing_information = ct_testing_information[0:1000]
-                          logger.info("Creating control with title={0},desc={1},testingInformation={2}".format(control_row['ControlTitle'],ct_description,ct_testing_information))
+                          logger.info("Creating control with title={0},desc={1},testingInformation={2}".format(
+                              control_row['ControlTitle'], ct_description, ct_testing_information))
                           events = control_row['Events']
                           events_json = json.loads(events)
                           control_mapping_sources = []
                           for event in events_json["events"]:
                               try:
                                   source_name_suffix = 1
-                                  control_mapping_source = {}
-                                  control_mapping_source['sourceName'] = data_source_name_prefix + str(source_name_suffix)
+                                  control_mapping_source = {'sourceName': data_source_name_prefix + str(source_name_suffix)}
                                   source_name_suffix = source_name_suffix + 1
-                                  control_mapping_source['sourceSetUpOption'] = 'System_Controls_Mapping'  #https://docs.aws.amazon.com/audit-manager/latest/APIReference/API_CreateControlMappingSource.html#auditmanager-Type-CreateControlMappingSource-sourceType
+                                  control_mapping_source['sourceSetUpOption'] = 'System_Controls_Mapping'
+                                  # https://docs.aws.amazon.com/audit-manager/latest/APIReference/API_CreateControlMappingSource.html#auditmanager-Type-CreateControlMappingSource-sourceType
                                   source_from_event = event['eventSourceName']
                                   source_type = source_name_mapping[source_from_event]
                                   control_mapping_source['sourceType'] = source_type
-                                  source_keyword = {}
-                                  source_keyword['keywordValue'] = event['eventSelector']
-                                  source_keyword['keywordInputType'] = 'SELECT_FROM_LIST'
+                                  source_keyword = {'keywordValue': event['eventSelector'],
+                                                    'keywordInputType': 'SELECT_FROM_LIST'}
                                   control_mapping_source['sourceKeyword'] = source_keyword
                                   if source_type == 'AWS_API_Call':
                                       control_mapping_source['sourceFrequency'] = 'DAILY'
@@ -491,54 +359,58 @@ Resources:
                               except Exception as ee:
                                   logger.info(ee)
                                   raise
-                          custom_control = auditmanager_client.create_control(name = control_row['ControlTitle'],
-                                                                              description = ct_description,
-                                                                              testingInformation = ct_testing_information,
-                                                                              controlMappingSources = control_mapping_sources).get('control')
+                          custom_control = audit_manager_client.create_control(name=control_row['ControlTitle'],
+                                                                               description=ct_description,
+                                                                               testingInformation=ct_testing_information,
+                                                                               controlMappingSources=control_mapping_sources).get(
+                              'control')
                           am_controls.append({'id': custom_control.get('id')})
                       am_controls_grouped_by_control_set[control_set] = am_controls
                   return am_controls_grouped_by_control_set
               except ClientError:
                   logger.exception("Couldn't create custom controls")
                   raise
-
+          
+          
           def create_automated_assessment_custom_framework(framework_name):
               """
               Create custom framework from a CSV file
-
+          
               Parameters:
                 - framework_name: string containing name of the custom framework
-
+          
               Returns:
                 - None
               """
-
-              auditmanager_client = boto3.client('auditmanager')
-
-              frameworks_to_id_mapping = get_existing_assessment_frameworks(auditmanager_client)
-
+          
+              audit_manager_client = boto3.client('auditmanager')
+          
+              frameworks_to_id_mapping = get_existing_assessment_frameworks(audit_manager_client)
+          
               if framework_name in frameworks_to_id_mapping:
-                  logger.info("{0} is an existing automated assessment framework!. Skipping creation of assessment framework".format(framework_name))
+                  logger.info("{0} is an existing automated assessment framework!. Skipping creation of assessment framework"
+                              .format(framework_name))
                   logger.info(frameworks_to_id_mapping)
                   return
-
+          
               rows_grouped_by_control_set = collections.defaultdict(list)
-
+          
               # Read Automated Assessment Framework CSV from URL
               try:
-                  s3_resource = boto3.resource('s3')
+                  s3_resource = boto3.resource('s3', region_name="us-west-2")
                   s3_object = get_framework_content(s3_resource, framework_name)
                   csvfile = s3_object.get()['Body'].read().decode('utf-8').splitlines()
                   reader = csv.DictReader(csvfile)
                   for row in reader:
-                      row["ControlTitle"] = row["ControlTitle"]  + "(Vendor Insights Auto Assessment)"
+                      row["ControlTitle"] = row["ControlTitle"] + "(Vendor Insights Auto Assessment)"
                       rows_grouped_by_control_set[row['ControlSet']].append(row)
               except Exception as e:
                   logger.exception("Could not find the Automated Assessment Framework from the specified location")
                   logger.exception(str(e))
                   raise
-
-              am_controls_grouped_by_control_set = create_custom_controls_automated_framework(rows_grouped_by_control_set, auditmanager_client)
+          
+              am_controls_grouped_by_control_set = create_custom_controls_automated_framework(rows_grouped_by_control_set,
+                                                                                              audit_manager_client)
               time.sleep(2)
               try:
                   control_sets = []
@@ -546,119 +418,63 @@ Resources:
                       logger.info(">>" + str(am_controls_grouped_by_control_set.get(control_set)))
                       control_sets.append(
                           {
-                          'name': control_set,
-                          'controls': am_controls_grouped_by_control_set.get(control_set)
+                              'name': control_set,
+                              'controls': am_controls_grouped_by_control_set.get(control_set)
                           })
-                  logger.info(dict(control_sets))
-
-                  frameworks_to_id_mapping = get_existing_assessment_frameworks(auditmanager_client)
+                  logger.info(control_sets)
+          
+                  frameworks_to_id_mapping = get_existing_assessment_frameworks(audit_manager_client)
                   if framework_name in frameworks_to_id_mapping:
                       logger.info("{0} is an existing framework!. Deleting the old one".format(framework_name))
-                      response = auditmanager_client.delete_assessment_framework(frameworkId = frameworks_to_id_mapping[framework_name])
+                      response = audit_manager_client.delete_assessment_framework(
+                          frameworkId=frameworks_to_id_mapping[framework_name])
                       logger.info(frameworks_to_id_mapping)
                       logger.info(response)
-
-                  custom_framework = auditmanager_client.create_assessment_framework(name=framework_name, controlSets= control_sets)
+          
+                  custom_framework = audit_manager_client.create_assessment_framework(name=framework_name,
+                                                                                      controlSets=control_sets)
                   print('Successfully created custom framework: ', custom_framework.get('framework').get('name'), ' : ',
-                            custom_framework.get('framework').get('id'))
+                        custom_framework.get('framework').get('id'))
                   logger.info('-' * 88)
               except Exception as e:
                   logger.exception("Could not create custom framework: {0}".format(framework_name))
                   logger.exception(str(e))
                   raise
-
-          def update_self_assessment_custom_framework(framework_name):
-              """
-              Create custom framework from a CSV file
-
-              Parameters:
-                - framework_name : string with the name of the custom framework to be created
-
-              Returns:
-                - None
-              """
-
-              auditmanager_client = boto3.client('auditmanager')
-
-              frameworks_to_id_mapping = get_existing_assessment_frameworks(auditmanager_client)
-
-              rows_grouped_by_control_set = collections.defaultdict(list)
-
-              # Read Manual Assessment Framework CSV object from URL
-              try:
-
-                  s3_resource = boto3.resource('s3')
-                  s3_object = get_framework_content(s3_resource, framework_name)
-                  csvfile = s3_object.get()['Body'].read().decode('utf-8').splitlines()
-                  reader = csv.DictReader(csvfile)
-                  for row in reader:
-                      row["ControlTitle"] = row["ControlTitle"]  + "(Vendor Insights Self Assessment)"
-                      rows_grouped_by_control_set[row['ControlSet']].append(row)
-              except Exception as e:
-                  logger.info("Could not retrieve self assessment framework template from the mentioned location")
-                  logger.exception(str(e))
-                  raise
-
-              am_controls_grouped_by_control_set = create_custom_controls_self_assessment(rows_grouped_by_control_set, auditmanager_client)
-              time.sleep(2)
-              control_sets = []
-              for control_set in am_controls_grouped_by_control_set.keys():
-                  if len(am_controls_grouped_by_control_set.get(control_set)) == 0:
-                      continue
-                  logger.info(">>" + str(am_controls_grouped_by_control_set.get(control_set)))
-                  control_sets.append(
-                      {
-                      'name': control_set,
-                      'controls': am_controls_grouped_by_control_set.get(control_set)
-                      })
-              if len(control_sets) > 0:
-                  try:
-                      custom_framework_id = frameworks_to_id_mapping[framework_name]
-                      custom_framework = auditmanager_client.update_assessment_framework(
-                        frameworkId=custom_framework_id,
-                        name=framework_name,
-                        controlSets=control_sets
-                      )
-                      print('Successfully updated custom framework: ', custom_framework.get('framework').get('name'), ' : ',
-                                custom_framework.get('framework').get('id'))
-                      logger.info('-' * 88)
-                  except Exception as e:
-                      logger.exception("Could not update custom assessment framework : {0}".format(framework_name))
-                      logger.exception(str(e))
-                      raise
-
+          
+          
           def update_automated_assessment_custom_framework(framework_name):
               """
               Create custom framework from a CSV file
-
+          
               Parameters:
                 - framework_name: string containing name of the custom framework
-
+          
               Returns:
                 - None
               """
-
-              auditmanager_client = boto3.client('auditmanager')
-
-              frameworks_to_id_mapping = get_existing_assessment_frameworks(auditmanager_client)
-
+          
+              audit_manager_client = boto3.client('auditmanager')
+          
+              frameworks_to_id_mapping = get_existing_assessment_frameworks(audit_manager_client)
+          
               rows_grouped_by_control_set = collections.defaultdict(list)
-
+          
               # Read Automated Assessment Framework CSV from URL
               try:
-                  s3_resource = boto3.resource('s3')
+                  s3_resource = boto3.resource('s3', region_name="us-west-2")
                   s3_object = get_framework_content(s3_resource, framework_name)
                   csvfile = s3_object.get()['Body'].read().decode('utf-8').splitlines()
                   reader = csv.DictReader(csvfile)
                   for row in reader:
-                      row["ControlTitle"] = row["ControlTitle"]  + "(Vendor Insights Auto Assessment)"
+                      row["ControlTitle"] = row["ControlTitle"] + "(Vendor Insights Auto Assessment)"
                       rows_grouped_by_control_set[row['ControlSet']].append(row)
               except Exception as e:
                   logger.exception("Could not find the Automated Assessment Framework from the specified location")
                   logger.exception(str(e))
                   raise
-
-              am_controls_grouped_by_control_set = create_custom_controls_automated_framework(rows_grouped_by_control_set, auditmanager_client)
+          
+              am_controls_grouped_by_control_set = create_custom_controls_automated_framework(rows_grouped_by_control_set,
+                                                                                              audit_manager_client)
               time.sleep(2)
               try:
                   control_sets = []
@@ -666,74 +482,75 @@ Resources:
                       logger.info(">>" + str(am_controls_grouped_by_control_set.get(control_set)))
                       control_sets.append(
                           {
-                          'name': control_set,
-                          'controls': am_controls_grouped_by_control_set.get(control_set)
+                              'name': control_set,
+                              'controls': am_controls_grouped_by_control_set.get(control_set)
                           })
-                  logger.info(dict(control_sets))
-
+                  logger.info(control_sets)
+          
                   custom_framework_id = frameworks_to_id_mapping[framework_name]
-                  custom_framework = auditmanager_client.update_assessment_framework(
-                    frameworkId=custom_framework_id,
-                    name=framework_name,
-                    controlSets=control_sets
+                  custom_framework = audit_manager_client.update_assessment_framework(
+                      frameworkId=custom_framework_id,
+                      name=framework_name,
+                      controlSets=control_sets
                   )
                   print('Successfully updated custom framework: ', custom_framework.get('framework').get('name'), ' : ',
-                            custom_framework.get('framework').get('id'))
+                        custom_framework.get('framework').get('id'))
                   logger.info('-' * 88)
               except Exception as e:
                   logger.exception("Could not update custom framework: {0}".format(framework_name))
                   logger.exception(str(e))
                   raise
-
+          
+          
           def get_role_arn():
               """
               Get the created Vendor Insights role in this deployment account
-
+          
               Parameters:
                 - None
-
+          
               Returns:
                 - vendor_insights_role_arn : String signifying the Vendor Insights Role Arn
               """
-              acc_id = os.environ['AccountID']
-              vendor_insights_role_arn = "arn:aws:iam::{0}:role/{1}".format(acc_id, VENDOR_INSIGHTS_ROLENAME)
-              return vendor_insights_role_arn
-
+              return "arn:aws:iam::{0}:role/{1}".format(os.environ['AccountID'], VENDOR_INSIGHTS_ROLE_NAME)
+          
+          
           def get_view_assessment_role_arn():
               """
               Get the created Audit Manager Audit Owner role created in this deployment account
-
+          
               Parameters:
                 - None
-
+          
               Returns:
                 - view_assessment_role_arn : String signifying the AuditManagerAdminAccess role Arn
               """
-              acc_id = os.environ['AccountID']
-              view_assessment_role_arn = "arn:aws:iam::{0}:role/{1}".format(acc_id, VENDOR_INSIGHTS_VIEW_ASSESSMENTS_ROLENAME)
-              return view_assessment_role_arn
-
+              return "arn:aws:iam::{0}:role/{1}".format(os.environ['AccountID'], VENDOR_INSIGHTS_VIEW_ASSESSMENTS_ROLE_NAME)
+          
+          
           def create_assessment(framework_name):
               """
               Create an assessment from 'framework_name'
-
+          
               Parameters:
                 - framework_name: string containing name of the involved framework
-
+          
               Returns:
                 - None
               """
               s3bucket = os.environ['AssessmentReportsBucketName']
-              awsId = os.environ['AccountID']
-
+              aws_account_id = os.environ['AccountID']
+          
               role_arn = get_role_arn()
               view_assessment_role_arn = get_view_assessment_role_arn()
-              auditmanager_client = boto3.client('auditmanager')
-
+              audit_manager_client = boto3.client('auditmanager')
+          
               try:
-                  # Verifying an assessment with the same name doesnt exist already
+                  # Verifying an assessment with the same name does not exist already
                   assessment_metadata = list_active_assessments()
-                  active_assessments = list(filter(lambda x: (x["name"] == framework_to_assessment_map[framework_name] and x["status"] == 'ACTIVE'), assessment_metadata))
+                  active_assessments = list(
+                      filter(lambda x: (x["name"] == FRAMEWORK_NAME_TO_ASSESSMENT_NAME_MAP[framework_name] and x["status"] == 'ACTIVE'),
+                             assessment_metadata))
                   if len(active_assessments) > 0:
                       logger.info("Since an assessment with this name already exists, skipping its creation.")
                       return
@@ -741,19 +558,19 @@ Resources:
                   logger.exception("Could not confirm the existence of assessments with the same name")
                   logger.exception(str(e))
                   raise
-
-              frameworks_to_id_mapping = get_existing_assessment_frameworks(auditmanager_client)
+          
+              frameworks_to_id_mapping = get_existing_assessment_frameworks(audit_manager_client)
               if framework_name in frameworks_to_id_mapping:
                   logger.info("Found framework {0}".format(framework_name))
               else:
-                  logger.info("Error in create_self_assessment. Unable to find framework")
+                  logger.info("Error in create_assessment. Unable to find framework")
                   return
               framework_id = frameworks_to_id_mapping[framework_name]
-
+          
               desc = "Creating assessment using framework:{0} on {1}".format(framework_name, datetime.datetime.now())
               try:
-                  resp = auditmanager_client.create_assessment(
-                      name=framework_to_assessment_map[framework_name],
+                  resp = audit_manager_client.create_assessment(
+                      name=FRAMEWORK_NAME_TO_ASSESSMENT_NAME_MAP[framework_name],
                       description=desc,
                       assessmentReportsDestination={
                           'destinationType': 'S3',
@@ -762,7 +579,7 @@ Resources:
                       scope={
                           'awsAccounts': [
                               {
-                                  'id': awsId
+                                  'id': aws_account_id
                               },
                           ],
                           'awsServices': [
@@ -803,14 +620,15 @@ Resources:
                   logger.exception("Could not create assessment for framework : {0}".format(framework_name))
                   logger.exception(str(e))
                   raise
-
+          
+          
           def list_active_assessments():
               """
               Method to list all active assessments currently in AWS Audit Manager
-
+          
               Parameters:
                 - None
-
+          
               Returns:
                 - None
               """
@@ -818,41 +636,44 @@ Resources:
                   auditmanager_client = boto3.client('auditmanager')
                   response = auditmanager_client.list_assessments()
                   assessment_metadata = response["assessmentMetadata"]
-
-                  nextToken = None
-
+          
+                  next_token = None
+          
                   if 'nextToken' in response:
-                      nextToken = response['nextToken']
-
-                  while nextToken != None:
-                      nextToken = response['nextToken']
-                      response = auditmanager_client.list_assessments(nextToken = nextToken)
+                      next_token = response['nextToken']
+          
+                  while next_token is not None:
+                      next_token = response['nextToken']
+                      response = auditmanager_client.list_assessments(nextToken=next_token)
                       assessment_metadata = assessment_metadata + response["assessmentMetadata"]
                       if 'nextToken' not in response:
                           break
                       logger.info(response)
-
-                  assessment_metadata = sorted(assessment_metadata, key = lambda x: x["creationTime"], reverse=True)
+          
+                  assessment_metadata = sorted(assessment_metadata, key=lambda x: x["creationTime"], reverse=True)
                   return assessment_metadata
               except Exception as e:
                   logger.exception("Could not retrieve active assessment in AWS Audit Manager")
                   logger.exception(str(e))
                   raise
-
+          
+          
           def create_assessment_report(framework_name):
               """
-              Method to generate the generate an assessment report for the assessment created using 'framework_name'
-
+              Method to generate an assessment report for the assessment created using 'framework_name'
+          
               Parameters:
                 - framework_name : string with the name of the created framework
-
+          
               Returns:
                 - None
               """
               try:
                   auditmanager_client = boto3.client('auditmanager')
                   assessment_metadata = list_active_assessments()
-                  active_assessments = list(filter(lambda x: (x["name"] == framework_to_assessment_map[framework_name] and x["status"] == 'ACTIVE'), assessment_metadata))
+                  active_assessments = list(
+                      filter(lambda x: (x["name"] == FRAMEWORK_NAME_TO_ASSESSMENT_NAME_MAP[framework_name] and x["status"] == 'ACTIVE'),
+                             assessment_metadata))
                   if len(active_assessments) == 0:
                       logger.info("Error: No Active assessment. {0} could not be found".format(framework_name))
                       return
@@ -860,31 +681,33 @@ Resources:
                   logger.exception("Received Exception when trying to create assessment report...")
                   logger.exception(str(e))
                   raise
-
+          
               try:
                   assessment_id = active_assessments[0]["id"]
                   name = "Assessment_Report_{0}".format(framework_name)
                   desc = "Assessment Report Of {0} created on {1}".format(framework_name, datetime.datetime.now())
                   # Get Evidence Folders for the current assessment
-                  evidence_folders_response = auditmanager_client.get_evidence_folders_by_assessment(assessmentId = assessment_id)
+                  evidence_folders_response = auditmanager_client.get_evidence_folders_by_assessment(assessmentId=assessment_id)
                   # Associate all evidence folders to the assessment report
                   for evidence_folder in evidence_folders_response['evidenceFolders']:
                       evidence_folder_id = evidence_folder['id']
                       # Associate current folder with the assessment report
-                      auditmanager_client.associate_assessment_report_evidence_folder(assessmentId=assessment_id, evidenceFolderId=evidence_folder_id)
-
-                  auditmanager_client.create_assessment_report(name = name, description = desc, assessmentId = assessment_id)
+                      auditmanager_client.associate_assessment_report_evidence_folder(assessmentId=assessment_id,
+                                                                                      evidenceFolderId=evidence_folder_id)
+          
+                  auditmanager_client.create_assessment_report(name=name, description=desc, assessmentId=assessment_id)
               except Exception as e:
                   logger.exception(str(e))
                   raise
-
+          
+          
           def enable_audit_manager():
               """
               Method to enable AWS Audit Manager in the deployment account
-
+          
               Parameters:
                 - None
-
+          
               Returns:
                 - None
               """
@@ -892,14 +715,15 @@ Resources:
               # register_account() is idempotent in that if Audit Manager already is enabled - it does nothing.
               response = client.register_account()
               logger.info(json.dumps(response, indent=True))
-
+          
+          
           def deactivate_assessments(frameworks):
               """
               Method to deactivate all the assessments created via the Lambda Custom Resource as a part of rollback
-
+          
               Parameters:
                 - frameworks: A list with the names of all the frameworks that produce assessments
-
+          
               Returns:
                 - None
               """
@@ -907,245 +731,217 @@ Resources:
                   audit_manager_client = boto3.client('auditmanager')
                   assessment_metadata = list_active_assessments()
                   all_assessments = []
-                  self_assessment_frameworks_list = [
-                    VENDOR_INSIGHTS_SELF_ASSESSMENT_FW_NAME_V1,
-                    VENDOR_INSIGHTS_SELF_ASSESSMENT_FW_NAME_V2
-                  ]
                   automated_assessments_list = [
-                    VENDOR_INSIGHTS_AUTOMATED_ASSESSMENT_NAME_V1,
-                    VENDOR_INSIGHTS_AUTOMATED_ASSESSMENT_NAME_V2
+                      VENDOR_INSIGHTS_AUTOMATED_ASSESSMENT_NAME_V1,
+                      VENDOR_INSIGHTS_AUTOMATED_ASSESSMENT_NAME_V2
                   ]
                   for framework_name in frameworks:
-                      if framework_name in self_assessment_frameworks_list:
-                          assessment_name_base_length = len(VENDOR_INSIGHTS_SELF_ASSESSMENT_BASENAME)
-                          active_assessments = list(filter(lambda x: (x["name"][:assessment_name_base_length] == VENDOR_INSIGHTS_SELF_ASSESSMENT_BASENAME and x["status"] == 'ACTIVE'), assessment_metadata))
-                          all_assessments = all_assessments + active_assessments
-                      else:
-                          active_assessments = list(filter(lambda x: (x["name"] in automated_assessments_list and x["status"] == 'ACTIVE'), assessment_metadata))
-                          all_assessments = all_assessments + active_assessments
+                      active_assessments = list(
+                          filter(lambda x: (x["name"] in automated_assessments_list and x["status"] == 'ACTIVE'),
+                                 assessment_metadata))
+                      all_assessments = all_assessments + active_assessments
                   if len(all_assessments) == 0:
                       logger.info("No active assessments to deactivate...")
                       return
-                  logger.info("All assessments: {}".format(', '.join(map(str, all_assessments))));
+                  logger.info("All assessments: {}".format(', '.join(map(str, all_assessments))))
                   assessment_ids = set()
                   for active_assessment in all_assessments:
                       assessment_ids.add(active_assessment["id"])
-                  logger.info("Assessments ids: {}".format(', '.join(map(str, list(assessment_ids)))));
+                  logger.info("Assessments ids: {}".format(', '.join(map(str, list(assessment_ids)))))
                   for assessment_id in assessment_ids:
                       logger.info("Deactivating assessment ID : {0}".format(str(assessment_id)))
-                      audit_manager_client.update_assessment_status(assessmentId = assessment_id, status = 'INACTIVE')
+                      audit_manager_client.update_assessment_status(assessmentId=assessment_id, status='INACTIVE')
               except Exception as e:
                   logger.exception("Could not deactivate assessments as part of rollback")
                   logger.exception(str(e))
                   return
-
-
-          def create_event_handler(event, context, physicalResourceId):
+          
+          
+          def create_event_handler(event, context, physical_resource_id):
               """
               Method to handle the 'Create' request type events
-
+          
               Parameters:
                 - event: Event that triggers custom resource lambda execution
                 - context: Execution context for lambda
-
+          
               Returns:
                 - None
               """
-
+          
               # Fetch all environment variables
-              primary_region = os.environ['PrimaryRegion']
-              current_region = os.environ['AWS_REGION']
-              create_vendor_insights_self_assessment = os.environ['CreateVendorInsightsSelfAssessment']
               create_vendor_insights_automated_assessment = os.environ['CreateVendorInsightsAutomatedAssessment']
-              assessment_reports_bucket_name = os.environ['AssessmentReportsBucketName']
-              stackset_outputs_bucket_name = os.environ['StackSetOutputsBucketName']
+              stack_set_outputs_bucket_name = os.environ['StackSetOutputsBucketName']
               security_framework_version = os.environ['SecurityFrameworkVersion']
-
+          
               try:
                   # Enable AWS Audit Manager
                   enable_audit_manager()
+          
                   if security_framework_version == 'V2':
-                    create_self_assessment_custom_framework(VENDOR_INSIGHTS_SELF_ASSESSMENT_FW_NAME_V2)
-                    create_automated_assessment_custom_framework(VENDOR_INSIGHTS_AUTOMATED_ASSESSMENT_FW_NAME_V2)
-                    # Create Self Assessment related resources
-                    if create_vendor_insights_self_assessment == "Yes" and (primary_region == current_region):
-                        create_assessment(VENDOR_INSIGHTS_SELF_ASSESSMENT_FW_NAME_V2)
-                    # Create Automated Assessment related resources
-                    if create_vendor_insights_automated_assessment == "Yes":
-                        create_assessment(VENDOR_INSIGHTS_AUTOMATED_ASSESSMENT_FW_NAME_V2)
-                        create_assessment_report(VENDOR_INSIGHTS_AUTOMATED_ASSESSMENT_FW_NAME_V2)
+                      # Create V2 Automated Assessment related resources (if needed)
+                      if create_vendor_insights_automated_assessment == "Yes":
+                          create_automated_assessment_custom_framework(VENDOR_INSIGHTS_AUTOMATED_ASSESSMENT_FW_NAME_V2)
+                          create_assessment(VENDOR_INSIGHTS_AUTOMATED_ASSESSMENT_FW_NAME_V2)
+                          create_assessment_report(VENDOR_INSIGHTS_AUTOMATED_ASSESSMENT_FW_NAME_V2)
                   else:
-                    create_self_assessment_custom_framework(VENDOR_INSIGHTS_SELF_ASSESSMENT_FW_NAME_V1)
-                    create_automated_assessment_custom_framework(VENDOR_INSIGHTS_AUTOMATED_ASSESSMENT_FW_NAME_V1)
-                    # Create Self Assessment related resources
-                    if create_vendor_insights_self_assessment == "Yes" and (primary_region == current_region):
-                        create_assessment(VENDOR_INSIGHTS_SELF_ASSESSMENT_FW_NAME_V1)
-                    # Create Automated Assessment related resources
-                    if create_vendor_insights_automated_assessment == "Yes":
-                        create_assessment(VENDOR_INSIGHTS_AUTOMATED_ASSESSMENT_FW_NAME_V1)
-                        create_assessment_report(VENDOR_INSIGHTS_AUTOMATED_ASSESSMENT_FW_NAME_V1)
+          
+                      # Create V1 Automated Assessment related resources
+                      if create_vendor_insights_automated_assessment == "Yes":
+                          create_automated_assessment_custom_framework(VENDOR_INSIGHTS_AUTOMATED_ASSESSMENT_FW_NAME_V1)
+                          create_assessment(VENDOR_INSIGHTS_AUTOMATED_ASSESSMENT_FW_NAME_V1)
+                          create_assessment_report(VENDOR_INSIGHTS_AUTOMATED_ASSESSMENT_FW_NAME_V1)
+          
                   response_data = {"message": "Successfully created all required resources",
-                                  "OutputBucket": stackset_outputs_bucket_name}
-                  cfnresponse.send(event, context, cfnresponse.SUCCESS, response_data, physicalResourceId)
+                                   "OutputBucket": stack_set_outputs_bucket_name}
+          
+                  cfnresponse.send(event, context, cfnresponse.SUCCESS, response_data, physical_resource_id)
               except Exception as e:
                   logger.exception(str(e))
                   response_data = {"error": str(e)}
-                  cfnresponse.send(event, context, cfnresponse.FAILED, response_data, physicalResourceId)
+                  cfnresponse.send(event, context, cfnresponse.FAILED, response_data, physical_resource_id)
                   raise
-
-          def update_event_handler(event, context, physicalResourceId):
+          
+          
+          def update_event_handler(event, context, physical_resource_id):
               """
               Method to handle 'Update' request type lambda event
-
+          
               Parameters:
                 - event: Event that triggers custom resource lambda execution
                 - context: Execution context for lambda
-                - physicalResourceId: Resource Id for the custom resource
-
+                - physical_resource_id: Resource identifier for the custom resource
+          
               Returns:
                 - None
               """
               # Update the Vendor Insights Custom Frameworks
               try:
                   auditmanager_client = boto3.client('auditmanager')
-                  current_region = os.environ['AWS_REGION']
-                  primary_region = os.environ['PrimaryRegion']
-                  create_vendor_insights_self_assessment = os.environ['CreateVendorInsightsSelfAssessment']
                   create_vendor_insights_automated_assessment = os.environ['CreateVendorInsightsAutomatedAssessment']
-                  existing_frameworks = auditmanager_client.list_assessment_frameworks(frameworkType = 'Custom')
+                  existing_frameworks = auditmanager_client.list_assessment_frameworks(frameworkType='Custom')
                   existing_frameworks_count = len(existing_frameworks['frameworkMetadataList'])
                   security_framework_version = os.environ['SecurityFrameworkVersion']
+          
                   # Enable Audit Manager
                   enable_audit_manager()
+          
                   if existing_frameworks_count == 0:
-                      create_event_handler(event, context, physicalResourceId)
+                      create_event_handler(event, context, physical_resource_id)
                       return {}
-                  existing_frameworks_names = list(map(lambda framework: framework['name'], existing_frameworks['frameworkMetadataList']))
+          
+                  existing_frameworks_names = list(
+                      map(lambda framework: framework['name'], existing_frameworks['frameworkMetadataList']))
                   logger.info("Existing frameworks: {}".format(', '.join(map(str, existing_frameworks_names))))
-                  existing_assessments = auditmanager_client.list_assessments();
-                  existing_assessments_names = list(map(lambda assessment: assessment['name'], existing_assessments['assessmentMetadata']))
+          
+                  existing_assessments = auditmanager_client.list_assessments()
+                  existing_assessments_names = list(
+                      map(lambda assessment: assessment['name'], existing_assessments['assessmentMetadata']))
                   logger.info("Existing assessments: {}".format(', '.join(map(str, existing_assessments_names))))
-                  self_assessment_framework_name = VENDOR_INSIGHTS_SELF_ASSESSMENT_FW_NAME_V2
+          
                   automated_assessment_framework_name = VENDOR_INSIGHTS_AUTOMATED_ASSESSMENT_FW_NAME_V2
+          
                   if security_framework_version == 'V1':
-                    self_assessment_framework_name = VENDOR_INSIGHTS_SELF_ASSESSMENT_FW_NAME_V1
-                    automated_assessment_framework_name = VENDOR_INSIGHTS_AUTOMATED_ASSESSMENT_FW_NAME_V1
-                  # Create Self Assessment related resources
-                  if self_assessment_framework_name in existing_frameworks_names:
-                      logger.info("Self assessment framework {} already exists.".format(self_assessment_framework_name ))
-                  else:
-                    if (primary_region == current_region):
-                        logger.info("Creating self assessment framework: {}...".format(self_assessment_framework_name))
-                        create_self_assessment_custom_framework(self_assessment_framework_name)
-                  if create_vendor_insights_self_assessment == "Yes" and framework_to_assessment_map[self_assessment_framework_name] not in existing_assessments_names:
-                      logger.info("Creating self assessment: {}...".format(framework_to_assessment_map[self_assessment_framework_name]))
-                      create_assessment(self_assessment_framework_name)
-                  # Create Automated Assessment related resources
+                      automated_assessment_framework_name = VENDOR_INSIGHTS_AUTOMATED_ASSESSMENT_FW_NAME_V1
+          
+                  # Create Automated Assessment Framework (if needed)
                   if automated_assessment_framework_name in existing_frameworks_names:
                       logger.info("Automated assessment framework {} already exists.".format(automated_assessment_framework_name))
-                  else:
+                  elif create_vendor_insights_automated_assessment == "Yes":
                       logger.info("Creating automated assessment framework: {}...".format(automated_assessment_framework_name))
                       create_automated_assessment_custom_framework(automated_assessment_framework_name)
-                  if create_vendor_insights_automated_assessment == "Yes" and framework_to_assessment_map[automated_assessment_framework_name] not in existing_assessments_names:
-                      logger.info("Creating automated assessment: {}...".format(framework_to_assessment_map[automated_assessment_framework_name]))
+          
+                  # Create Automated Assessment (if needed)
+                  if create_vendor_insights_automated_assessment == "Yes" \
+                          and FRAMEWORK_NAME_TO_ASSESSMENT_NAME_MAP[automated_assessment_framework_name] not in existing_assessments_names:
+                      logger.info("Creating automated assessment: {}...".format(
+                          FRAMEWORK_NAME_TO_ASSESSMENT_NAME_MAP[automated_assessment_framework_name]))
                       create_assessment(automated_assessment_framework_name)
+          
               except Exception as e:
-                  logger.exception("An Exception occured while trying to update assessment frameworks")
+                  logger.exception("An Exception occurred while trying to update assessment frameworks")
                   logger.exception(str(e))
-                  response_data = {"error": str(e)}
-                  cfnresponse.send(event, context, cfnresponse.FAILED, {}, physicalResourceId)
+                  cfnresponse.send(event, context, cfnresponse.FAILED, {}, physical_resource_id)
+          
               logger.info("Successfully updated Vendor Insights Custom Assessment Frameworks")
-              cfnresponse.send(event, context, cfnresponse.SUCCESS, {}, physicalResourceId)
-
-          def delete_event_handler(event, context, physicalResourceId):
+              cfnresponse.send(event, context, cfnresponse.SUCCESS, {}, physical_resource_id)
+          
+          
+          def delete_event_handler(event, context, physical_resource_id):
               """
               Method to handle 'Delete' request type lambda event
-
+          
               Parameters:
                 - event: Event that triggers custom resource lambda execution
                 - context: Execution context for lambda
-
+          
               Returns:
                 - None
               """
-              # Fetch relevant environment variables
-              current_region = os.environ['AWS_REGION']
-
               try:
                   # Make all vendor insights related assessments inactive
                   frameworks = [
                       VENDOR_INSIGHTS_AUTOMATED_ASSESSMENT_FW_NAME_V2,
                       VENDOR_INSIGHTS_AUTOMATED_ASSESSMENT_FW_NAME_V1,
-                      VENDOR_INSIGHTS_SELF_ASSESSMENT_FW_NAME_V2,
-                      VENDOR_INSIGHTS_SELF_ASSESSMENT_FW_NAME_V1
                   ]
                   deactivate_assessments(frameworks)
                   response_data = {"message": "Successfully deactivated all Vendor Insights assessments"}
-                  cfnresponse.send(event, context, cfnresponse.SUCCESS, response_data, physicalResourceId)
+                  cfnresponse.send(event, context, cfnresponse.SUCCESS, response_data, physical_resource_id)
               except Exception as e:
                   logger.exception(str(e))
                   response_data = {"error": str(e)}
-                  cfnresponse.send(event, context, cfnresponse.FAILED, response_data, physicalResourceId)
+                  cfnresponse.send(event, context, cfnresponse.FAILED, response_data, physical_resource_id)
                   raise
-
+          
+          
           def lambda_handler(event, context):
               # Log CloudFormation Custom Resource Lambda being invoked
               logger.info("CloudFormation Custom Resource was invoked with event: " + json.dumps(event, default=str))
-
+          
               # Determine the type of Custom Resource event and invoke respective control flow
-              EVENT_TYPE = event['RequestType']
-
+              event_type = event['RequestType']
+          
               if ('PhysicalResourceId' in event) and event['PhysicalResourceId']:
-                  physicalResourceId = event['PhysicalResourceId']
-                  logger.info("Reusing the same physicalResourceId as: " + physicalResourceId)
+                  physical_resource_id = event['PhysicalResourceId']
+                  logger.info("Reusing the same physicalResourceId as: " + physical_resource_id)
               else:
-                  physicalResourceId = str(uuid.uuid4())
-                  logger.info("physicalResourceId does not exist in the event, creating new one: " + physicalResourceId)
-
+                  physical_resource_id = str(uuid.uuid4())
+                  logger.info("physicalResourceId does not exist in the event, creating new one: " + physical_resource_id)
+          
               # Verify the existence of all environment variables before event execution
               try:
-                primary_region = os.environ['PrimaryRegion']
-                create_vendor_insights_bucket = os.environ['CreateVendorInsightsBucket']
-                assessment_reports_bucket_name = os.environ['AssessmentReportsBucketName']
-                stack_set_output_bucket_name = os.environ['StackSetOutputsBucketName']
-                audit_reports_bucket_name = os.environ['AuditReportsBucketName']
-                create_vendor_insights_self_assessment = os.environ['CreateVendorInsightsSelfAssessment']
-                vendor_insights_self_assessment_id = os.environ['VendorInsightsSelfAssessmentID']
-                security_framework_version = os.environ['SecurityFrameworkVersion']
-
-                # Suffix the vendor insights self assessment name with provided
-                global VENDOR_INSIGHTS_SELF_ASSESSMENT_NAME_V2
-                VENDOR_INSIGHTS_SELF_ASSESSMENT_NAME_V2 = VENDOR_INSIGHTS_SELF_ASSESSMENT_NAME_V2 + vendor_insights_self_assessment_id
-                framework_to_assessment_map[VENDOR_INSIGHTS_SELF_ASSESSMENT_FW_NAME_V2] = VENDOR_INSIGHTS_SELF_ASSESSMENT_NAME_V2
-                framework_to_assessment_map[VENDOR_INSIGHTS_SELF_ASSESSMENT_FW_NAME_V1] = VENDOR_INSIGHTS_SELF_ASSESSMENT_NAME_V1
-
-                create_vendor_insights_auto_assessment = os.environ['CreateVendorInsightsAutomatedAssessment']
-                account_id = os.environ['AccountID']
+                  primary_region = os.environ['PrimaryRegion']
+                  assessment_reports_bucket_name = os.environ['AssessmentReportsBucketName']
+                  stack_set_output_bucket_name = os.environ['StackSetOutputsBucketName']
+                  security_framework_version = os.environ['SecurityFrameworkVersion']
+                  create_vendor_insights_auto_assessment = os.environ['CreateVendorInsightsAutomatedAssessment']
+                  account_id = os.environ['AccountID']
               except Exception as e:
-                logger.exception("Could not retreive the necessary Lambda Environment Variables")
-                logger.exception(str(e))
-                response_data = {"error": str(e)}
-                cfnresponse.send(event, context, cfnresponse.FAILED, response_data, physicalResourceId)
-                raise
-
-              if EVENT_TYPE == 'Create':
-                # Handle Custom Resource 'Create' request type
-                create_event_handler(event, context, physicalResourceId)
-                return
-
-              elif EVENT_TYPE == 'Update':
-                # Handle Custom Resource 'Create' request type
-                update_event_handler(event, context, physicalResourceId)
-                return
-
-              elif EVENT_TYPE == 'Delete':
-                # Handle Custom Resource 'Delete' request type
-                delete_event_handler(event, context, physicalResourceId)
-                return
-
+                  logger.exception("Could not retrieve the necessary Lambda Environment Variables")
+                  logger.exception(str(e))
+                  response_data = {"error": str(e)}
+                  cfnresponse.send(event, context, cfnresponse.FAILED, response_data, physical_resource_id)
+                  raise
+          
+              if event_type == 'Create':
+                  # Handle Custom Resource 'Create' request type
+                  create_event_handler(event, context, physical_resource_id)
+                  return
+          
+              elif event_type == 'Update':
+                  # Handle Custom Resource 'Create' request type
+                  update_event_handler(event, context, physical_resource_id)
+                  return
+          
+              elif event_type == 'Delete':
+                  # Handle Custom Resource 'Delete' request type
+                  delete_event_handler(event, context, physical_resource_id)
+                  return
+          
               # Should be impossible to reach here -- unknown event request type
               response_data = {"message": "Received Unknown Custom Resource Event Request Type"}
-              cfnresponse.send(event, context, cfnresponse.FAILED, response_data, physicalResourceId)
+              cfnresponse.send(event, context, cfnresponse.FAILED, response_data, physical_resource_id)
+
   VendorInsightsStackSetOutputsFunction:
     Type: AWS::Lambda::Function
     Properties:
@@ -1154,92 +950,79 @@ Resources:
           PrimaryRegion: !Ref PrimaryRegion
           AssessmentReportsBucketName: !Join ["-", ["vendor-insights-assessment-reports-bucket", !Ref AWS::AccountId]]
           StackSetOutputsBucketName:  !Join ["-", ["vendor-insights-stack-set-output-bucket", !Ref AWS::AccountId]]
-          CreateVendorInsightsSelfAssessment: !Ref CreateVendorInsightsSelfAssessment
-          VendorInsightsSelfAssessmentID: !Ref ProductName
-          CreateVendorInsightsBucket: !Ref CreateVendorInsightsBucket
           CreateVendorInsightsIAMRoles: !Ref CreateVendorInsightsIAMRoles
           CreateVendorInsightsAutomatedAssessment: !Ref CreateVendorInsightsAutomatedAssessment
           AccountID: !Ref AWS::AccountId
           MarketplaceManagementAccountId: !Ref MarketplaceManagementAccountId
-          AuditReportsBucketName: !Join ["-", ["vendor-insights-audit-reports-bucket", !Ref AWS::AccountId]]
       Handler: index.lambda_handler
       Timeout: 900
       MemorySize: 2048
       Role: !GetAtt 'VendorInsightsStackSetOutputsLambdaExecutionRole.Arn'
-      Runtime: python3.9
+      Runtime: python3.10
       Code:
         ZipFile: |
           # Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
           # SPDX-License-Identifier: Apache-2.0
-          import base64
-          import logging
-          import boto3
           import json
-          import uuid
-          import cfnresponse
+          import logging
           import os
-
-          VENDOR_INSIGHTS_ASSET_BUCKET_NAME = "aws-vendor-insights"
-          VENDOR_INSIGHTS_SELF_ASSESSMENT_TEMPLATE_KEY_V1 = "vendor-onboarding-templates/v0/frameworks/SelfAssessmentFrameworkV1.csv"
-          VENDOR_INSIGHTS_AUTOMATED_ASSESSMENT_TEMPLATE_KEY_V1 = "vendor-onboarding-templates/v0/frameworks/AutomatedAssessmentFrameworkV1.csv"
-          VENDOR_INSIGHTS_SELF_ASSESSMENT_TEMPLATE_KEY_V2 = "vendor-onboarding-templates/v0/frameworks/SelfAssessmentFrameworkV2.csv"
-          VENDOR_INSIGHTS_AUTOMATED_ASSESSMENT_TEMPLATE_KEY_V2 = "vendor-onboarding-templates/v0/frameworks/AutomatedAssessmentFrameworkV2.csv"
-          VENDOR_INSIGHTS_SELF_ASSESSMENT_FW_NAME_V1 = "AWSVendorInsightsSelfAssessmentFramework"
-          VENDOR_INSIGHTS_SELF_ASSESSMENT_NAME_V1 = "AWSVendorInsightsSelfAssessment"
+          import uuid
+          
+          import boto3
+          import cfnresponse
+          
           VENDOR_INSIGHTS_AUTOMATED_ASSESSMENT_FW_NAME_V1 = "AWSVendorInsightsAutomatedAssessmentFramework"
           VENDOR_INSIGHTS_AUTOMATED_ASSESSMENT_NAME_V1 = "AWSVendorInsightsAutomatedAssessment"
-          VENDOR_INSIGHTS_SELF_ASSESSMENT_FW_NAME_V2 = "AWSVendorInsightsSelfAssessmentFrameworkV2"
-          VENDOR_INSIGHTS_SELF_ASSESSMENT_NAME_V2 = "AWSVendorInsightsSelfAssessmentV2"
           VENDOR_INSIGHTS_AUTOMATED_ASSESSMENT_FW_NAME_V2 = "AWSVendorInsightsAutomatedAssessmentFrameworkV2"
           VENDOR_INSIGHTS_AUTOMATED_ASSESSMENT_NAME_V2 = "AWSVendorInsightsAutomatedAssessmentV2"
-          VENDOR_INSIGHTS_VIEW_ASSESSMENTS_ROLENAME = "AWSAuditManagerAdminRole"
-          VENDOR_INSIGHTS_ROLENAME = "AWSVendorInsightsRole"
-          VENDOR_INSIGHTS_PASS_ROLENAME = "AWSVendorInsightsCrossAccountAccessPassRole"
-
-          framework_to_assessment_map = {
-            VENDOR_INSIGHTS_SELF_ASSESSMENT_FW_NAME_V1: VENDOR_INSIGHTS_SELF_ASSESSMENT_NAME_V1,
-            VENDOR_INSIGHTS_SELF_ASSESSMENT_FW_NAME_V2: VENDOR_INSIGHTS_SELF_ASSESSMENT_NAME_V2,
-            VENDOR_INSIGHTS_AUTOMATED_ASSESSMENT_FW_NAME_V1: VENDOR_INSIGHTS_AUTOMATED_ASSESSMENT_NAME_V1,
-            VENDOR_INSIGHTS_AUTOMATED_ASSESSMENT_FW_NAME_V2: VENDOR_INSIGHTS_AUTOMATED_ASSESSMENT_NAME_V2
+          VENDOR_INSIGHTS_VIEW_ASSESSMENTS_ROLE_NAME = "AWSAuditManagerAdminRole"
+          VENDOR_INSIGHTS_ROLE_NAME = "AWSVendorInsightsRole"
+          VENDOR_INSIGHTS_PASS_ROLE_NAME = "AWSVendorInsightsCrossAccountAccessPassRole"
+          FRAMEWORK_NAME_TO_ASSESSMENT_NAME_MAP = {
+              VENDOR_INSIGHTS_AUTOMATED_ASSESSMENT_FW_NAME_V1: VENDOR_INSIGHTS_AUTOMATED_ASSESSMENT_NAME_V1,
+              VENDOR_INSIGHTS_AUTOMATED_ASSESSMENT_FW_NAME_V2: VENDOR_INSIGHTS_AUTOMATED_ASSESSMENT_NAME_V2
           }
-
+          
           logger = logging.getLogger(__name__)
           logger.setLevel(logging.INFO)
-
+          
+          
           def get_role_arn():
               """
               Get the created Vendor Insights role in this deployment account
-
+          
               Parameters:
                 - None
-
+          
               Returns:
                 - vendor_insights_role_arn : String signifying the Vendor Insights Role Arn
               """
               acc_id = os.environ['AccountID']
-              vendor_insights_role_arn = "arn:aws:iam::{0}:role/{1}".format(acc_id, VENDOR_INSIGHTS_ROLENAME)
+              vendor_insights_role_arn = "arn:aws:iam::{0}:role/{1}".format(acc_id, VENDOR_INSIGHTS_ROLE_NAME)
               return vendor_insights_role_arn
-
+          
+          
           def get_role_arn_for_name(role_name):
               """
               Construct the role ARN for given role name
-
+          
               Parameters:
                 - role_name: Name of the role
-
+          
               Returns:
                 - ARN of the given role
               """
               acc_id = os.environ['AccountID']
               return "arn:aws:iam::{0}:role/{1}".format(acc_id, role_name)
-
+          
+          
           def list_active_assessments():
               """
               Method to list all active assessments currently in AWS Audit Manager
-
+          
               Parameters:
                 - None
-
+          
               Returns:
                 - None
               """
@@ -1247,225 +1030,199 @@ Resources:
                   auditmanager_client = boto3.client('auditmanager')
                   response = auditmanager_client.list_assessments()
                   assessment_metadata = response["assessmentMetadata"]
-
-                  nextToken = None
-
+          
+                  next_token = None
+          
                   if 'nextToken' in response:
-                      nextToken = response['nextToken']
-
-                  while nextToken != None:
-                      nextToken = response['nextToken']
-                      response = auditmanager_client.list_assessments(nextToken = nextToken)
+                      next_token = response['nextToken']
+          
+                  while next_token is not None:
+                      next_token = response['nextToken']
+                      response = auditmanager_client.list_assessments(nextToken=next_token)
                       assessment_metadata = assessment_metadata + response["assessmentMetadata"]
                       if 'nextToken' not in response:
                           break
                       logger.info(response)
-
-                  assessment_metadata = sorted(assessment_metadata, key = lambda x: x["creationTime"], reverse=True)
+          
+                  assessment_metadata = sorted(assessment_metadata, key=lambda x: x["creationTime"], reverse=True)
                   return assessment_metadata
               except Exception as e:
                   logger.exception("Could not retrieve active assessment in AWS Audit Manager")
                   logger.exception(str(e))
                   raise
-
+          
+          
           def store_stack_set_output(frameworks):
               """
               Method to collect and store information that needs to be handed off to Vendor Insights in the outputs S3 bucket.
-
+          
               Parameters:
                 - frameworks: A list with the names of all the frameworks that produce assessments
-
+          
               Returns:
                 - None
               """
               try:
                   s3_resource = boto3.resource('s3')
-
+          
                   # Stack Sets Output Bucket
-                  stackset_outputs_bucket = os.environ['StackSetOutputsBucketName']
-                  # Audit Reports Bucket
-                  audit_reports_bucket = os.environ['AuditReportsBucketName']
+                  stack_set_outputs_bucket = os.environ['StackSetOutputsBucketName']
                   # Vendor Insights IAM role ARN
                   vendor_insights_iam_role_arn = get_role_arn()
                   # Current Region
                   current_region = os.environ['AWS_REGION']
-                  # Has there been a Vendor Insights Bucket created?
-                  create_vendor_insights_bucket = os.environ['CreateVendorInsightsBucket']
                   # Did the deployment create VendorInsightsIAMRoles
                   create_vendor_insights_iam_roles = os.environ['CreateVendorInsightsIAMRoles']
                   # Marketplace management account ID specified during deployment
                   marketplace_management_account_id = os.environ['MarketplaceManagementAccountId']
                   # Specified primary region during deployment
                   primary_region = os.environ['PrimaryRegion']
-                  # Opt to create vendor insights self assessment
-                  create_vendor_insights_self_assessment = os.environ['CreateVendorInsightsSelfAssessment']
                   # Opt to create vendor insights automated assessment
                   create_vendor_insights_automated_assessment = os.environ['CreateVendorInsightsAutomatedAssessment']
-
+          
                   template_parameters = {
-                      "CreateVendorInsightsBucket": create_vendor_insights_bucket,
                       "CreateVendorInsightsIAMRoles": create_vendor_insights_iam_roles,
                       "MarketplaceManagementAccountId": marketplace_management_account_id,
                       "PrimaryRegion": primary_region,
-                      "CreateVendorInsightsSelfAssessment": create_vendor_insights_self_assessment,
                       "CreateVendorInsightsAutomatedAssessment": create_vendor_insights_automated_assessment
                   }
-
+          
                   # Assessment ARNs
-                  self_assessment_arns = []
-                  automated_assessment_arns = []
+                  automated_assessment_arn_list = []
                   auditmanager_client = boto3.client('auditmanager')
                   assessment_metadata = list_active_assessments()
-
-                  self_assessments_data = []
+          
                   automated_assessments_data = []
-                  self_assessment_frameworks_list = [
-                    VENDOR_INSIGHTS_SELF_ASSESSMENT_FW_NAME_V1,
-                    VENDOR_INSIGHTS_SELF_ASSESSMENT_FW_NAME_V2
-                  ]
                   automated_assessments_frameworks_list = [
-                    VENDOR_INSIGHTS_AUTOMATED_ASSESSMENT_FW_NAME_V1,
-                    VENDOR_INSIGHTS_AUTOMATED_ASSESSMENT_FW_NAME_V2
+                      VENDOR_INSIGHTS_AUTOMATED_ASSESSMENT_FW_NAME_V1,
+                      VENDOR_INSIGHTS_AUTOMATED_ASSESSMENT_FW_NAME_V2
                   ]
                   for framework_name in frameworks:
-                      assessment_name_length = len(framework_to_assessment_map[framework_name])
-                      active_assessments = list(filter(lambda x: (x["name"][:assessment_name_length] == framework_to_assessment_map[framework_name] and x["status"] == 'ACTIVE'), assessment_metadata))
-                      if framework_name in self_assessment_frameworks_list:
-                          self_assessments_data = self_assessments_data + active_assessments
-                      elif framework_name in automated_assessments_frameworks_list:
+                      assessment_name_length = len(FRAMEWORK_NAME_TO_ASSESSMENT_NAME_MAP[framework_name])
+                      active_assessments = list(
+                          filter(lambda x: (x["name"][:assessment_name_length] ==
+                                            FRAMEWORK_NAME_TO_ASSESSMENT_NAME_MAP[framework_name] and x["status"] == 'ACTIVE'),
+                                 assessment_metadata))
+                      if framework_name in automated_assessments_frameworks_list:
                           automated_assessments_data = automated_assessments_data + active_assessments
-
-                  for active_assessment in self_assessments_data:
-                      assessment_id = active_assessment["id"]
-                      assessment_response = auditmanager_client.get_assessment(assessmentId = assessment_id)
-                      assessment_arn = assessment_response['assessment']['arn']
-                      assessment_name = assessment_response['assessment']['metadata']['name']
-                      assessment_object = {"Name" : assessment_name, "AssessmentArn" : assessment_arn}
-                      self_assessment_arns = self_assessment_arns + [assessment_object]
-
+          
                   for active_assessment in automated_assessments_data:
                       assessment_id = active_assessment["id"]
-                      assessment_response = auditmanager_client.get_assessment(assessmentId = assessment_id)
+                      assessment_response = auditmanager_client.get_assessment(assessmentId=assessment_id)
                       assessment_arn = assessment_response['assessment']['arn']
                       assessment_name = assessment_response['assessment']['metadata']['name']
                       assessment_object = {"Name": assessment_name, "AssessmentArn": assessment_arn}
-                      automated_assessment_arns = automated_assessment_arns + [assessment_object]
-
-                  if create_vendor_insights_bucket == "No":
-                      audit_report_bucket = "Not Applicable"
-
-                  vendor_insights_active_assessment_arns = {
-                      "Self Assessments": self_assessment_arns,
-                      "Automated Assessments": automated_assessment_arns
+                      automated_assessment_arn_list = automated_assessment_arn_list + [assessment_object]
+          
+                  vendor_insights_active_assessments = {
+                      "Automated Assessments": automated_assessment_arn_list
                   }
-
+          
                   object_name = "outputs-{0}.json".format(current_region)
-                  content = {}
-                  content["Onboarding Parameters"] = template_parameters
-                  content["VendorInsights Audit Reports Bucket"] = audit_reports_bucket
-                  content["VendorInsights IAM Role Arn"] = vendor_insights_iam_role_arn
-                  content["Audit Manager Assessments"] = vendor_insights_active_assessment_arns
-
-                  if (os.environ['MarketplaceManagementAccountId'] == "") or (os.environ['MarketplaceManagementAccountId'] == os.environ['AccountID']):
-                    content["VendorInsights Pass Role Arn"] = get_role_arn_for_name(VENDOR_INSIGHTS_PASS_ROLENAME)
+                  content = {"Onboarding Parameters": template_parameters,
+                             "VendorInsights IAM Role Arn": vendor_insights_iam_role_arn,
+                             "Audit Manager Assessments": vendor_insights_active_assessments}
+          
+                  if (os.environ['MarketplaceManagementAccountId'] == "") or (
+                          os.environ['MarketplaceManagementAccountId'] == os.environ['AccountID']):
+                      content["VendorInsights Pass Role Arn"] = get_role_arn_for_name(VENDOR_INSIGHTS_PASS_ROLE_NAME)
                   content = json.dumps(content, indent=True)
-                  s3_resource.Object(stackset_outputs_bucket, object_name).put(Body=content)
-
+                  s3_resource.Object(stack_set_outputs_bucket, object_name).put(Body=content)
+          
               except Exception as e:
                   logger.exception("Could not store output in the stack set outputs bucket")
                   logger.exception(str(e))
                   raise
-
-          def delete_stackset_output_bucket_objects():
+          
+          
+          def delete_stack_set_output_bucket_objects():
               try:
                   # To empty the stack sets output bucket and finally delete it
-                  stackset_outputs_bucketname = os.environ['StackSetOutputsBucketName']
+                  stack_set_outputs_bucket_name = os.environ['StackSetOutputsBucketName']
                   primary_region = os.environ['PrimaryRegion']
                   current_region = os.environ['AWS_REGION']
-
+          
                   if current_region != primary_region:
                       response_data = {"message": "Nothing to do since not in the Primary Region"}
                       logger.info(response_data)
                       return
                   s3_resource = boto3.resource('s3')
-                  s3_bucket = s3_resource.Bucket(stackset_outputs_bucketname)
-                  bucket_versioning = s3_resource.BucketVersioning(stackset_outputs_bucketname)
+                  s3_bucket = s3_resource.Bucket(stack_set_outputs_bucket_name)
+                  bucket_versioning = s3_resource.BucketVersioning(stack_set_outputs_bucket_name)
                   if bucket_versioning.status == 'Enabled':
                       s3_bucket.object_versions.delete()
                   else:
                       s3_bucket.objects.all().delete()
-
+          
                   response_data = {"message": "Successfully emptied and deleted S3 outputs bucket"}
                   logger.info(response_data)
               except Exception as e:
                   logger.exception("Could not delete outputs bucket")
                   logger.exception(str(e))
                   raise
-
+          
+          
           def lambda_handler(event, context):
               logger.info("CloudFormation Custom Resource was invoked with event: " + json.dumps(event, default=str))
-
-              EVENT_TYPE = event['RequestType']
-
+          
+              event_type = event['RequestType']
+          
               if ('PhysicalResourceId' in event) and event['PhysicalResourceId']:
-                  physicalResourceId = event['PhysicalResourceId']
-                  logger.info("Reusing the same physicalResourceId as: " + physicalResourceId)
+                  physical_resource_id = event['PhysicalResourceId']
+                  logger.info("Reusing the same physicalResourceId as: " + physical_resource_id)
               else:
-                  physicalResourceId = str(uuid.uuid4())
-                  logger.info("physicalResourceId does not exist in the event, creating new one: " + physicalResourceId)
-
+                  physical_resource_id = str(uuid.uuid4())
+                  logger.info("physicalResourceId does not exist in the event, creating new one: " + physical_resource_id)
+          
               # Fetch important environment variables
               try:
                   current_region = os.environ['AWS_REGION']
                   primary_region = os.environ['PrimaryRegion']
-                  stackset_outputs_bucketname = os.environ['StackSetOutputsBucketName']
+                  stack_set_outputs_bucket_name = os.environ['StackSetOutputsBucketName']
                   account_id = os.environ['AccountID']
                   vendor_aws_account_id = os.environ['MarketplaceManagementAccountId']
-                  audit_reports_bucketname = os.environ['AuditReportsBucketName']
-                  create_vendor_insights_bucket = os.environ['CreateVendorInsightsBucket']
-
+          
               except Exception as e:
                   logger.exception("Failed to retrieve necessary environment variables...")
                   logger.exception(str(e))
                   response_body = {"error": str(e)}
-                  cfnresponse.send(event, context, cfnresponse.FAILED, response_body, physicalResourceId)
+                  cfnresponse.send(event, context, cfnresponse.FAILED, response_body, physical_resource_id)
                   return
-
+          
               frameworks = [
-                VENDOR_INSIGHTS_SELF_ASSESSMENT_FW_NAME_V1,
-                VENDOR_INSIGHTS_AUTOMATED_ASSESSMENT_FW_NAME_V1,
-                VENDOR_INSIGHTS_SELF_ASSESSMENT_FW_NAME_V2,
-                VENDOR_INSIGHTS_AUTOMATED_ASSESSMENT_FW_NAME_V2
+                  VENDOR_INSIGHTS_AUTOMATED_ASSESSMENT_FW_NAME_V1,
+                  VENDOR_INSIGHTS_AUTOMATED_ASSESSMENT_FW_NAME_V2
               ]
               try:
-                  if EVENT_TYPE == 'Create':
+                  if event_type == 'Create':
                       # Store all stack set output in S3 bucket
                       store_stack_set_output(frameworks)
-
-                      cfnresponse.send(event, context, cfnresponse.SUCCESS, {}, physicalResourceId)
+          
+                      cfnresponse.send(event, context, cfnresponse.SUCCESS, {}, physical_resource_id)
                       return
-                  elif EVENT_TYPE == 'Update':
+                  elif event_type == 'Update':
                       # Store all stack set output in S3 bucket
                       store_stack_set_output(frameworks)
-
-                      cfnresponse.send(event, context, cfnresponse.SUCCESS, {}, physicalResourceId)
+          
+                      cfnresponse.send(event, context, cfnresponse.SUCCESS, {}, physical_resource_id)
                       return
-                  elif EVENT_TYPE == 'Delete':
+                  elif event_type == 'Delete':
                       # Empty Stack Set Output Bucket
-                      delete_stackset_output_bucket_objects()
-
-                      cfnresponse.send(event, context, cfnresponse.SUCCESS, {}, physicalResourceId)
+                      delete_stack_set_output_bucket_objects()
+          
+                      cfnresponse.send(event, context, cfnresponse.SUCCESS, {}, physical_resource_id)
                       return
               except Exception as e:
-                  logger.exception("Failed to complete actions for event type : {0}".format(EVENT_TYPE))
+                  logger.exception("Failed to complete actions for event type : {0}".format(event_type))
                   logger.exception(str(e))
                   response_body = {"error": str(e)}
-                  cfnresponse.send(event, context, cfnresponse.FAILED, response_body, physicalResourceId)
-
+                  cfnresponse.send(event, context, cfnresponse.FAILED, response_body, physical_resource_id)
+          
               logger.exception("Invalid Request Type received in event, should not be possible to reach this control flow")
               response_data = {"error": "Received invalid request type in event object"}
-              cfnresponse.send(event, context, cfnresponse.FAILED, response_data, physicalResourceId)
+              cfnresponse.send(event, context, cfnresponse.FAILED, response_data, physical_resource_id)
               return
+
   VendorInsightsLaunchpadLambdaExecutionRole:
     Type: AWS::IAM::Role
     Properties:
@@ -1547,13 +1304,10 @@ Resources:
     Properties:
       ServiceToken: !GetAtt VendorInsightsLaunchpadFunction.Arn
       # This versions needs to be updated to trigger update events on the lambda function
-      UUID: "db7815a5-5154-40b3-9a0d-32c8632c15e7"
+      UUID: "b915231d-6568-4a5b-a99c-360e4ecf308d"
       MarketplaceManagementAccountId: !Ref MarketplaceManagementAccountId
       PrimaryRegion: !Ref PrimaryRegion
       CreateVendorInsightsIAMRoles: !Ref CreateVendorInsightsIAMRoles
-      CreateVendorInsightsBucket: !Ref CreateVendorInsightsBucket
-      CreateVendorInsightsSelfAssessment: !Ref CreateVendorInsightsSelfAssessment
-      VendorInsightsSelfAssessmentIdentifier: !Ref ProductName
       CreateVendorInsightsAutomatedAssessment: !Ref CreateVendorInsightsAutomatedAssessment
       SecurityFrameworkVersion: !Ref SecurityFrameworkVersion
   VendorInsightsStackSetOutputsLambdaTrigger:
@@ -1565,13 +1319,10 @@ Resources:
     Properties:
       ServiceToken: !GetAtt VendorInsightsStackSetOutputsFunction.Arn
       # This versions needs to be updated to trigger update events on the lambda function
-      UUID: "db7815a5-5154-40b3-9a0d-32c8632c15e7"
+      UUID: "b915231d-6568-4a5b-a99c-360e4ecf308d"
       MarketplaceManagementAccountId: !Ref MarketplaceManagementAccountId
       PrimaryRegion: !Ref PrimaryRegion
       CreateVendorInsightsIAMRoles: !Ref CreateVendorInsightsIAMRoles
-      CreateVendorInsightsBucket: !Ref CreateVendorInsightsBucket
-      CreateVendorInsightsSelfAssessment: !Ref CreateVendorInsightsSelfAssessment
-      VendorInsightsSelfAssessmentIdentifier: !Ref ProductName
       CreateVendorInsightsAutomatedAssessment: !Ref CreateVendorInsightsAutomatedAssessment
       SecurityFrameworkVersion: !Ref SecurityFrameworkVersion
 
