@@ -5,23 +5,13 @@ Parameters:
     Type: String
     AllowedPattern: "^(\\d{12})$"
     ConstraintDescription: MarketplaceManagementAccountId must be 12-digit number and cannot be left empty.
-    Description: Provide AWS account ID for your AWS account that you use for managing Marketplace product listings.
-  CreateAuditReportsBucket:
-    Type: String
-    Default: "Yes"
-    Description: Do you want to create the Vendor Insights Artifacts S3 Bucket(vendor-insights-artifacts-bucket-{YourAccountID}) and its related bucket policy? If it already exists, please Select 'No'
-    AllowedValues:
-      - "Yes"
-      - "No"
+    Description: Provide AWS account ID for your AWS account that you use for managing AWS Marketplace product listings.
   StackSetOutputsBucketName:
     Type: String
     MinLength: 4
     Description: Stack Sets output bucket name
 
 Conditions:
-  CreateArtifactsBucket: !Equals
-    - !Ref CreateAuditReportsBucket
-    - "Yes"
   IsCurrentAccountMarketplaceManagementAccount: !Equals
     - !Ref MarketplaceManagementAccountId
     - !Ref AWS::AccountId
@@ -120,8 +110,6 @@ Resources:
                   - s3:Get*
                   - s3:List*
                 Resource:
-                  - !Sub arn:aws:s3:::vendor-insights-audit-reports-bucket-${AWS::AccountId}/*
-                  - !Sub arn:aws:s3:::vendor-insights-audit-reports-bucket-${AWS::AccountId}
                   - !Sub
                     - "arn:aws:s3:::${StackSetOutputsBucketName}"
                     - StackSetOutputsBucketName: !Ref StackSetOutputsBucketName
@@ -170,20 +158,20 @@ Resources:
                   - !Sub arn:aws:auditmanager:*:${AWS::AccountId}:*
 
 Outputs:
-  AWSMarkeptlaceVendorInsightsCrossAccountAccessPassRole:
+  AWSMarketplaceVendorInsightsCrossAccountAccessPassRole:
     Condition: IsCurrentAccountMarketplaceManagementAccount
-    Description: AWSMarkeptlaceVendorInsightsCrossAccountAccessPassRole ARN (To be provided to AWS Marketplace Operations Team)
+    Description: AWS Vendor Insights cross account access pass role ARN to be provided to AWS Marketplace Catalog Operations (MCO) team.
     Value: !GetAtt
       - AWSVendorInsightsCrossAccountAccessPassRole
       - Arn
   AWSMarketplaceVendorInsightsRoleArn:
-    Description: AWSVendorInsightsRole ARN (To be provided to AWS Marketplace Operations Team)
+    Description: AWS Vendor Insights role ARN to be provided to AWS Marketplace Catalog Operations (MCO) team.
     Value: !GetAtt
       - AWSVendorInsightsRole
       - Arn
   AWSMarketplaceVendorInsightsMCORoleArn:
     Condition: IsCurrentAccountMarketplaceManagementAccount
-    Description: AWSVendorInsightsMCORole ARN (To be provided to AWS Marketplace Operations Team)
+    Description: AWS Vendor Insights onboarding role ARN to be provided to AWS Marketplace Catalog Operations (MCO) team.
     Value: !GetAtt
       - AWSVendorInsightsOnboardingDelegationRole
       - Arn
