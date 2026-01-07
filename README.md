@@ -1,13 +1,149 @@
-## AWS Marketplace Vendor Assessment
+# AWS Marketplace Vendor Insights Setup
 
-# Vendor Assessment Setup
+This repository provides tools and templates for deploying AWS Marketplace Vendor Insights to customer accounts. Vendor Insights lets AWS Marketplace sellers offer buyers on-demand access to security and compliance information for their SaaS solutions through a dashboard of 125 security controls.
 
-Vendor Insights lets AWS Marketplace sellers offer buyers on-demand access to security and compliance information for their SaaS solutions. This information is shared through a dashboard comprised of 125 security controls. Each control is evaluated based on a combination of four evidence sources.
+## Setup Process Overview
 
-The first source is evidence automatically gathered by AWS audit manager and Config. The second and third are SOC2 and ISO audit reports which can be shared directly with Vendor Insights. The fourth is a self assessment that can be as short as 29 questions if we choose to enable the other evidence sources.
+The setup process consists of two main phases:
 
-The onboarding process deploys the services necessary to collect this evidence and build the assessment report that feeds the vendor insights profile. Onboarding is achieved using AWS CloudFormation Stacks and StackSets . We first deploy a prerequisite stack that creates the IAM roles and permissions needed to operate CloudFormation StackSets. Then we use StackSets or CloudFormation Stacks to deploy into the production accounts to allow vendor insights to gather evidence
+1. **Phase 1: Prepare Template URLs** - Get CloudFormation template URLs hosted in your S3 bucket
+2. **Phase 2: Deploy CloudFormation Templates** - Use the URLs to deploy the actual Vendor Insights resources
 
+## Quick Start
+
+**Phase 1: Get Template URLs**
+```bash
+pip install -r requirements.txt
+python3 setup_customer_templates.py --account-id 123456789012 --region us-west-2 --role-name Admin
+```
+
+**Phase 2: Deploy Templates**
+Use the output URLs in CloudFormation (see [CloudFormation Deployment](#cloudformation-deployment) section)
+
+## Overview
+
+Vendor Insights evaluates security controls using four evidence sources:
+
+1. **AWS Audit Manager & Config** - Automatically gathered evidence
+2. **SOC2 Reports** - Shared directly with Vendor Insights  
+3. **ISO Audit Reports** - Shared directly with Vendor Insights
+4. **Self Assessment** - As few as 29 questions when other sources are enabled
+
+The onboarding process deploys AWS services to collect evidence and build assessment reports using CloudFormation Stacks and StackSets.
+
+## Files
+
+- `setup_customer_templates.py` - Automated setup script
+- `requirements.txt` - Python dependencies
+- `v0/VendorInsightsPrerequisiteCFT.yaml` - IAM roles and StackSet permissions
+- `v0/VendorInsightsOnboardingCFT.yaml` - Main Vendor Insights resources
+
+## Prerequisites
+
+1. Python 3.6 or later
+2. AWS CLI configured with appropriate permissions
+3. Access to assume roles in target customer accounts
+4. Understanding of [AWS Marketplace Vendor Insights setup requirements](https://docs.aws.amazon.com/marketplace/latest/userguide/vendor-insights-setting-up.html)
+
+## Phase 1: Prepare Template URLs
+
+You can use either the automated script or manual steps to prepare your CloudFormation template URLs.
+
+### Option A: Automated Script
+
+#### Installation
+
+```bash
+pip install -r requirements.txt
+```
+
+#### Basic Usage
+
+```bash
+python3 setup_customer_templates.py --account-id 123456789012 --region us-west-2 --role-name Admin
+```
+
+#### Advanced Usage
+
+```bash
+python3 setup_customer_templates.py \
+  --account-id 123456789012 \
+  --region us-west-2 \
+  --role-name Admin \
+  --bucket-name my-custom-bucket
+```
+
+#### Parameters
+
+- `--account-id` (required): Target AWS account ID
+- `--region` (optional): AWS region (default: us-east-1)
+- `--role-name` (optional): IAM role to assume (default: OrganizationAccountAccessRole)
+- `--bucket-name` (optional): S3 bucket name (default: vendor-insights-templates-{account-id})
+
+#### What the Script Does
+
+1. Downloads the latest Vendor Insights templates from GitHub
+2. Assumes the specified role in the target account
+3. Creates an S3 bucket with versioning enabled
+4. Updates template URLs to point to your bucket
+5. Uploads all templates to S3
+6. Outputs CloudFormation template URLs for deployment
+
+### Option B: Manual Setup
+
+#### Step 1: Download Templates
+
+```bash
+curl -L https://github.com/aws-samples/aws-marketplace-vendor-insights/archive/refs/heads/main.zip -o templates.zip
+unzip templates.zip
+cd aws-marketplace-vendor-insights-main/vendor-onboarding-templates
+```
+
+#### Step 2: Assume Role (if needed)
+
+```bash
+aws sts assume-role \
+  --role-arn arn:aws:iam::123456789012:role/OrganizationAccountAccessRole \
+  --role-session-name VendorInsightsSetup
+
+# Export the credentials from the output:
+export AWS_ACCESS_KEY_ID=<AccessKeyId>
+export AWS_SECRET_ACCESS_KEY=<SecretAccessKey>
+export AWS_SESSION_TOKEN=<SessionToken>
+```
+
+#### Step 3: Create S3 Bucket
+
+```bash
+aws s3 mb s3://vendor-insights-templates-123456789012 --region us-west-2
+aws s3api put-bucket-versioning --bucket vendor-insights-templates-123456789012 --versioning-configuration Status=Enabled
+```
+
+#### Step 4: Update Template URLs
+
+Replace all occurrences of:
+```
+https://aws-vendor-insights.s3.amazonaws.com/
+```
+
+With your bucket URL:
+```
+https://vendor-insights-templates-123456789012.s3.us-west-2.amazonaws.com/
+```
+
+#### Step 5: Upload Templates
+
+```bash
+aws s3 sync v0/ s3://vendor-insights-templates-123456789012/v0/ --region us-west-2
+```
+
+#### Step 6: Deploy CloudFormation Templates
+
+Your template URLs will be:
+- **Prerequisite**: `https://vendor-insights-templates-123456789012.s3.us-west-2.amazonaws.com/v0/VendorInsightsPrerequisiteCFT.yaml`
+- **Onboarding**: `https://vendor-insights-templates-123456789012.s3.us-west-2.amazonaws.com/v0/VendorInsightsOnboardingCFT.yaml`
+
+## Phase 2: Deploy CloudFormation Templates
 
 Please refer to the [Setting up as a seller guide](https://docs.aws.amazon.com/marketplace/latest/userguide/vendor-insights-setting-up.html) for key onboarding steps. Onboarding steps (including prerequisites) include below.
 
@@ -34,13 +170,11 @@ The below guide covers the steps to be performed in order to deploy and configur
 There are 2 CFT files that you will be running as part of the Vendor Insights setup. 
 
 * *VendorInsightsPrerequisiteCFT.yaml* sets up the necessary admin role and execution permissions that are needed to run StackSets in your account. 
-* *VendorInsightsOnboardingCFT.yaml* is responsible for setting up the above mentioned AWS services and configuring the appropriate IAM permissions that will allow Vendor Insights service to gather data for the SaaS product running in your AWS account and display those on your Vendor Insights profile. These location for these files are as follows:
-    * [Vender Insights prerequisite template](https://d2jixhtb1m9n7r.cloudfront.net/vendor-onboarding-templates/v0/VendorInsightsPrerequisiteCFT.yaml)
-    * [Vendor Insights Onboarding template](https://d2jixhtb1m9n7r.cloudfront.net/vendor-onboarding-templates/v0/VendorInsightsOnboardingCFT.yaml)
+* *VendorInsightsOnboardingCFT.yaml* is responsible for setting up the above mentioned AWS services and configuring the appropriate IAM permissions that will allow Vendor Insights service to gather data for the SaaS product running in your AWS account and display those on your Vendor Insights profile. These template URLs are generated in Phase 1.
 
 ### **Step 1: Execute *VendorInsightsPrerequisiteCFT.yaml* to setup IAM permissions for the StackSet run:**
 
-To begin the setup, execute the instructions to [Create a stack](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-using-console-create-stack-template.html) by specifying the S3 location for *[VendorInsightsPrerequisiteCFT.yaml](https://aws-vendor-insights.s3.amazonaws.com/vendor-onboarding-templates/v0/VendorInsightsPrerequisiteCFT.yaml)*. You can provide a custom name for the Stack.
+To begin the setup, execute the instructions to [Create a stack](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-using-console-create-stack-template.html) by specifying the S3 location for *VendorInsightsPrerequisiteCFT.yaml* (generated in Phase 1). You can provide a custom name for the Stack.
 
 <img width="422" alt="image" src="https://user-images.githubusercontent.com/3976999/168182997-7ef27624-b6aa-4262-a8c7-32e214716029.png">
 
@@ -62,7 +196,7 @@ Next, execute the instructions to [Create a stack set with self-managed permissi
 
 <img width="422" alt="image" src="https://user-images.githubusercontent.com/3976999/168183155-9fc54da7-352d-4139-b9d1-965ff734dbc6.png">
 
-Specify the S3 location for *[VendorInsightsOnboardingCFT.yaml](https://aws-vendor-insights.s3.amazonaws.com/vendor-onboarding-templates/v0/VendorInsightsOnboardingCFT.yaml).*
+Specify the S3 location for *VendorInsightsOnboardingCFT.yaml* (generated in Phase 1).
 
 <img width="422" alt="image" src="https://user-images.githubusercontent.com/3976999/168183189-49745610-56e7-4447-84d1-0b41d0a4ba10.png">
 
@@ -98,6 +232,72 @@ Once the execution of the *VendorInsightsOnboardingCFT.yaml* StackSet is complet
 
 For any question or issues you may face when executing these steps, please visit the [AWS Marketplace seller support page](http://aws.amazon.com/marketplace/management/contact-us/?category=listing&details=Hello%20AWS%20Marketplace%20Operations%20Team%2C%0A%0AI%20want%20to%20add%20security%20profile%20for%20product%20id%3A%20%3CProductId%3E%0A%0AThanks&marketplace=commercial&subCategory=update).
 
+## Post-Deployment Steps
+
+1. **Upload Certificates**: Add ISO-27001 and SOC2 reports to the audit reports bucket
+2. **Complete Self Assessment**: Answer questions in AWS Audit Manager
+3. **Contact AWS Marketplace**: Reply to your welcome email confirming successful deployment
+
+## Troubleshooting
+
+### Permission Errors
+- Verify AWS credentials have assume role permissions
+- Check role exists with correct trust policy
+- Ensure role has S3 and CloudFormation permissions
+
+### Network Issues
+- Check internet connectivity for GitHub downloads
+- Corporate firewalls may block access - use manual setup
+
+### S3 Bucket Issues
+- Bucket names must be globally unique
+- Verify region supports S3 bucket creation
+- Check for naming conflicts
+
+### Template Issues
+- Validate YAML syntax after URL modifications
+- Ensure S3 URLs match your region format
+
+## Required IAM Permissions
+
+### For Assumed Role
+```json
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "s3:CreateBucket",
+                "s3:PutBucketVersioning", 
+                "s3:PutObject",
+                "cloudformation:*",
+                "iam:CreateRole",
+                "iam:AttachRolePolicy"
+            ],
+            "Resource": "*"
+        }
+    ]
+}
+```
+
+### For Script Execution
+```json
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "sts:AssumeRole",
+                "sts:GetCallerIdentity"
+            ],
+            "Resource": "*"
+        }
+    ]
+}
+```
+
 ## Appendix
 
 ### IAM Roles created by onboarding CFTs
@@ -118,9 +318,14 @@ More on these roles here : https://docs.aws.amazon.com/AWSCloudFormation/latest/
 
 ### Costs
 
-For estimating costs, please refer to https://aws.amazon.com/blogs/mt/use-amazon-athena-and-aws-cloudtrail-to-estimate-billing-for-aws-config-rule-evaluations/ and https://aws.amazon.com/premiumsupport/knowledge-center/retrieve-aws-config-items-per-month/ 
+- **AWS Config**: $0.003 per configuration item per region
+- **Audit Manager**: Included in AWS Config pricing
+- **S3 Storage**: Standard S3 pricing for stored artifacts
+- **Total**: Varies based on resource changes and regions
 
-Vendor Insights creates 29 config rules and Config costs $0.003 per configuration item recorded in your AWS account per AWS Region. Assessment of overall cost varies since it depends on various factors including frequency of changes to resources. Please reach out to your AWS representative for assistance with this. 
+For detailed cost estimation, see:
+- [AWS Config billing estimation guide](https://aws.amazon.com/blogs/mt/use-amazon-athena-and-aws-cloudtrail-to-estimate-billing-for-aws-config-rule-evaluations/)
+- [Config items per month calculation](https://aws.amazon.com/premiumsupport/knowledge-center/retrieve-aws-config-items-per-month/) 
 
 
 
